@@ -1,0 +1,304 @@
+{
+  "name": "Planning Agent - Project Schedule Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "planning-agent/project-schedule",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger-002",
+      "name": "Webhook - Receive Engineering Plan",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "planning-agent-project-schedule"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.body.engineering_plan}}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "validate-plan-input-001",
+      "name": "Validate Engineering Plan",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse the engineering plan for schedule generation\nconst inputData = $input.item.json.body;\nlet engineeringPlan;\n\ntry {\n  engineeringPlan = typeof inputData.engineering_plan === 'string' \n    ? JSON.parse(inputData.engineering_plan) \n    : inputData.engineering_plan;\n} catch (error) {\n  throw new Error('Invalid Engineering Plan format: ' + error.message);\n}\n\n// Extract scheduling information\nconst scheduleInput = {\n  project_name: engineeringPlan.project_overview?.name || 'Unnamed Project',\n  features: engineeringPlan.feature_breakdown || [],\n  phases: engineeringPlan.implementation_phases || [],\n  risks: engineeringPlan.risk_analysis || [],\n  resources: engineeringPlan.resource_requirements || {},\n  total_features: (engineeringPlan.feature_breakdown || []).length,\n  total_phases: (engineeringPlan.implementation_phases || []).length,\n  timestamp: new Date().toISOString()\n};\n\nreturn { json: scheduleInput };"
+      },
+      "id": "parse-plan-001",
+      "name": "Parse Engineering Plan",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4",
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an expert Project Manager and Engineering Leader specializing in software project scheduling and resource planning.\n\nBased on the following Engineering Plan, create a detailed Project Schedule:\n\nProject: {{$json.project_name}}\nTotal Features: {{$json.total_features}}\nImplementation Phases: {{$json.phases}}\nFeatures Details: {{$json.features}}\nRisks: {{$json.risks}}\nResource Requirements: {{$json.resources}}\n\nGenerate a comprehensive Project Schedule in JSON format with this structure:\n\n{\n  \"project_schedule\": {\n    \"project_info\": {\n      \"project_name\": \"string\",\n      \"start_date\": \"YYYY-MM-DD\",\n      \"estimated_end_date\": \"YYYY-MM-DD\",\n      \"total_duration_weeks\": \"number\",\n      \"total_effort_person_weeks\": \"number\"\n    },\n    \"phases\": [\n      {\n        \"phase_id\": \"string\",\n        \"phase_name\": \"string\",\n        \"start_date\": \"YYYY-MM-DD\",\n        \"end_date\": \"YYYY-MM-DD\",\n        \"duration_weeks\": \"number\",\n        \"milestones\": [\n          {\n            \"milestone_id\": \"string\",\n            \"name\": \"string\",\n            \"target_date\": \"YYYY-MM-DD\",\n            \"deliverables\": [\"string\"],\n            \"dependencies\": [\"string\"]\n          }\n        ],\n        \"tasks\": [\n          {\n            \"task_id\": \"string\",\n            \"task_name\": \"string\",\n            \"description\": \"string\",\n            \"assigned_to\": \"string (role)\",\n            \"start_date\": \"YYYY-MM-DD\",\n            \"end_date\": \"YYYY-MM-DD\",\n            \"effort_days\": \"number\",\n            \"status\": \"Not Started|In Progress|Completed\",\n            \"dependencies\": [\"string\"],\n            \"priority\": \"Critical|High|Medium|Low\"\n          }\n        ]\n      }\n    ],\n    \"resource_allocation\": [\n      {\n        \"role\": \"string\",\n        \"allocation_percentage\": \"number\",\n        \"start_date\": \"YYYY-MM-DD\",\n        \"end_date\": \"YYYY-MM-DD\",\n        \"key_responsibilities\": [\"string\"]\n      }\n    ],\n    \"critical_path\": [\n      {\n        \"task_id\": \"string\",\n        \"task_name\": \"string\",\n        \"duration_days\": \"number\",\n        \"slack_days\": \"number\"\n      }\n    ],\n    \"risk_timeline\": [\n      {\n        \"risk_id\": \"string\",\n        \"description\": \"string\",\n        \"impact_on_schedule\": \"string\",\n        \"contingency_buffer_days\": \"number\"\n      }\n    ],\n    \"key_deliverables\": [\n      {\n        \"deliverable_name\": \"string\",\n        \"due_date\": \"YYYY-MM-DD\",\n        \"responsible_team\": \"string\",\n        \"dependencies\": [\"string\"]\n      }\n    ],\n    \"assumptions\": [\"string\"],\n    \"constraints\": [\"string\"]\n  }\n}\n\nAssume today's date as the project start date. Be realistic with timelines, account for dependencies, and include buffer time for risks. Provide specific dates and detailed task breakdowns."
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.7,
+          "maxTokens": 4000
+        }
+      },
+      "id": "ai-schedule-001",
+      "name": "AI - Generate Project Schedule",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1,
+      "position": [850, 300],
+      "credentials": {
+        "openAiApi": {
+          "id": "1",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse and validate the AI-generated schedule\nconst aiResponse = $input.item.json.response;\nlet projectSchedule;\n\ntry {\n  projectSchedule = typeof aiResponse === 'string' ? JSON.parse(aiResponse) : aiResponse;\n} catch (error) {\n  projectSchedule = {\n    project_schedule: {\n      raw_response: aiResponse,\n      parsing_error: error.message,\n      generated_at: new Date().toISOString()\n    }\n  };\n}\n\n// Calculate summary statistics\nconst phases = projectSchedule.project_schedule?.phases || [];\nconst totalTasks = phases.reduce((sum, phase) => sum + (phase.tasks?.length || 0), 0);\nconst totalMilestones = phases.reduce((sum, phase) => sum + (phase.milestones?.length || 0), 0);\n\n// Add metadata and summary\nconst result = {\n  ...projectSchedule,\n  summary: {\n    total_phases: phases.length,\n    total_tasks: totalTasks,\n    total_milestones: totalMilestones,\n    generated_at: new Date().toISOString()\n  },\n  metadata: {\n    generated_by: 'Planning Agent - Project Schedule Generator',\n    timestamp: new Date().toISOString(),\n    source_plan: $('Parse Engineering Plan').item.json.project_name,\n    version: '1.0'\n  }\n};\n\nreturn { json: result };"
+      },
+      "id": "format-schedule-001",
+      "name": "Format Schedule Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generate Gantt chart data for visualization\nconst schedule = $input.item.json.project_schedule;\nconst phases = schedule?.phases || [];\n\nconst ganttData = {\n  chart_type: 'gantt',\n  project_name: schedule.project_info?.project_name || 'Project',\n  start_date: schedule.project_info?.start_date,\n  end_date: schedule.project_info?.estimated_end_date,\n  tasks: []\n};\n\n// Convert phases and tasks to Gantt format\nphases.forEach((phase, phaseIndex) => {\n  // Add phase as a group\n  ganttData.tasks.push({\n    id: `phase-${phaseIndex}`,\n    name: phase.phase_name,\n    start: phase.start_date,\n    end: phase.end_date,\n    type: 'phase',\n    progress: 0,\n    dependencies: []\n  });\n  \n  // Add tasks under the phase\n  (phase.tasks || []).forEach((task, taskIndex) => {\n    ganttData.tasks.push({\n      id: task.task_id || `task-${phaseIndex}-${taskIndex}`,\n      name: task.task_name,\n      start: task.start_date,\n      end: task.end_date,\n      type: 'task',\n      progress: task.status === 'Completed' ? 100 : (task.status === 'In Progress' ? 50 : 0),\n      dependencies: task.dependencies || [],\n      assigned_to: task.assigned_to,\n      priority: task.priority,\n      parent: `phase-${phaseIndex}`\n    });\n  });\n});\n\nreturn {\n  json: {\n    ...ganttData,\n    generated_at: new Date().toISOString()\n  }\n};"
+      },
+      "id": "generate-gantt-001",
+      "name": "Generate Gantt Chart Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "latest_project_schedule",
+        "value": "={{JSON.stringify($('Format Schedule Output').item.json)}}"
+      },
+      "id": "save-schedule-state-001",
+      "name": "Save Schedule to State",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [1250, 450]
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "latest_gantt_data",
+        "value": "={{JSON.stringify($json)}}"
+      },
+      "id": "save-gantt-state-001",
+      "name": "Save Gantt Data to State",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [1450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Merge schedule and gantt data for final response\nconst scheduleData = $('Format Schedule Output').item.json;\nconst ganttData = $input.item.json;\n\nconst finalResponse = {\n  success: true,\n  project_schedule: scheduleData.project_schedule,\n  summary: scheduleData.summary,\n  visualization: {\n    gantt_chart: ganttData\n  },\n  metadata: scheduleData.metadata\n};\n\nreturn { json: finalResponse };"
+      },
+      "id": "merge-outputs-001",
+      "name": "Merge Final Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1650, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{JSON.stringify($json, null, 2)}}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "id": "webhook-response-002",
+      "name": "Respond with Schedule",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1850, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Error handler for schedule generation\nconst errorMessage = $input.item.json.message || 'Unknown error occurred';\nconst errorStack = $input.item.json.stack || '';\n\nconst errorResponse = {\n  success: false,\n  error: {\n    message: errorMessage,\n    timestamp: new Date().toISOString(),\n    agent: 'Planning Agent - Project Schedule Generator',\n    details: errorStack\n  }\n};\n\nreturn { json: errorResponse };"
+      },
+      "id": "error-handler-002",
+      "name": "Handle Schedule Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 500]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{JSON.stringify($json, null, 2)}}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "error-response-002",
+      "name": "Respond with Schedule Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [850, 500]
+    }
+  ],
+  "connections": {
+    "Webhook - Receive Engineering Plan": {
+      "main": [
+        [
+          {
+            "node": "Validate Engineering Plan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Engineering Plan": {
+      "main": [
+        [
+          {
+            "node": "Parse Engineering Plan",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Handle Schedule Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Engineering Plan": {
+      "main": [
+        [
+          {
+            "node": "AI - Generate Project Schedule",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI - Generate Project Schedule": {
+      "main": [
+        [
+          {
+            "node": "Format Schedule Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Schedule Output": {
+      "main": [
+        [
+          {
+            "node": "Generate Gantt Chart Data",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Save Schedule to State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Gantt Chart Data": {
+      "main": [
+        [
+          {
+            "node": "Save Gantt Data to State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Gantt Data to State": {
+      "main": [
+        [
+          {
+            "node": "Merge Final Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Final Output": {
+      "main": [
+        [
+          {
+            "node": "Respond with Schedule",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Schedule Error": {
+      "main": [
+        [
+          {
+            "node": "Respond with Schedule Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1.0",
+  "id": "planning-agent-project-schedule",
+  "meta": {
+    "instanceId": "planning-agent-002"
+  },
+  "tags": [
+    {
+      "name": "planning-agent"
+    },
+    {
+      "name": "project-schedule"
+    }
+  ]
+}
+

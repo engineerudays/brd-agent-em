@@ -1,0 +1,245 @@
+{
+  "name": "Planning Agent - Structured Engineering Plan Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "planning-agent/engineering-plan",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger-001",
+      "name": "Webhook - Receive Parsed BRD",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "planning-agent-engineering-plan"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.body.raw_brd_text}}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "validate-input-001",
+      "name": "Validate BRD Input",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse the incoming BRD data\nconst brdText = $input.item.json.body.raw_brd_text;\nlet parsedBRD;\n\ntry {\n  parsedBRD = typeof brdText === 'string' ? JSON.parse(brdText) : brdText;\n} catch (error) {\n  throw new Error('Invalid BRD format: ' + error.message);\n}\n\n// Extract key information for engineering plan\nconst extractedData = {\n  document_title: parsedBRD.document_info?.title || 'Untitled Project',\n  business_objectives: parsedBRD.business_objectives || [],\n  functional_requirements: parsedBRD.requirements?.functional || [],\n  non_functional_requirements: parsedBRD.requirements?.non_functional || [],\n  in_scope: parsedBRD.project_scope?.in_scope || [],\n  out_scope: parsedBRD.project_scope?.out_of_scope || [],\n  constraints: parsedBRD.constraints_assumptions_dependencies?.constraints || [],\n  assumptions: parsedBRD.constraints_assumptions_dependencies?.assumptions || [],\n  dependencies: parsedBRD.constraints_assumptions_dependencies?.dependencies || [],\n  stakeholders: parsedBRD.stakeholders || [],\n  timestamp: new Date().toISOString()\n};\n\nreturn { json: extractedData };"
+      },
+      "id": "parse-brd-001",
+      "name": "Parse BRD Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4",
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an expert Software Engineering Manager and Technical Architect. Your task is to create a comprehensive, structured engineering plan based on a Business Requirements Document (BRD).\n\nInput BRD Summary:\n- Project: {{$json.document_title}}\n- Business Objectives: {{$json.business_objectives}}\n- Functional Requirements: {{$json.functional_requirements}}\n- Non-Functional Requirements: {{$json.non_functional_requirements}}\n- In Scope: {{$json.in_scope}}\n- Constraints: {{$json.constraints}}\n\nPlease generate a detailed Structured Engineering Plan in JSON format with the following structure:\n\n{\n  \"engineering_plan\": {\n    \"project_overview\": {\n      \"name\": \"string\",\n      \"description\": \"string\",\n      \"objectives\": [\"string\"]\n    },\n    \"feature_breakdown\": [\n      {\n        \"feature_id\": \"string\",\n        \"feature_name\": \"string\",\n        \"description\": \"string\",\n        \"priority\": \"Critical|High|Medium|Low\",\n        \"complexity\": \"High|Medium|Low\",\n        \"estimated_effort\": \"string (e.g., 2 weeks)\",\n        \"dependencies\": [\"string\"],\n        \"technical_requirements\": [\"string\"],\n        \"acceptance_criteria\": [\"string\"]\n      }\n    ],\n    \"technical_architecture\": {\n      \"system_components\": [\"string\"],\n      \"integration_points\": [\"string\"],\n      \"data_flow\": \"string\",\n      \"security_considerations\": [\"string\"]\n    },\n    \"implementation_phases\": [\n      {\n        \"phase_number\": \"number\",\n        \"phase_name\": \"string\",\n        \"description\": \"string\",\n        \"features_included\": [\"string\"],\n        \"estimated_duration\": \"string\",\n        \"deliverables\": [\"string\"]\n      }\n    ],\n    \"risk_analysis\": [\n      {\n        \"risk_id\": \"string\",\n        \"description\": \"string\",\n        \"impact\": \"High|Medium|Low\",\n        \"probability\": \"High|Medium|Low\",\n        \"mitigation_strategy\": \"string\"\n      }\n    ],\n    \"resource_requirements\": {\n      \"team_composition\": [\"string\"],\n      \"tools_and_technologies\": [\"string\"],\n      \"infrastructure_needs\": [\"string\"]\n    },\n    \"success_metrics\": [\n      {\n        \"metric_name\": \"string\",\n        \"target_value\": \"string\",\n        \"measurement_method\": \"string\"\n      }\n    ]\n  }\n}\n\nBe thorough, specific, and actionable. Focus on technical feasibility and implementation details."
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.7,
+          "maxTokens": 4000
+        }
+      },
+      "id": "ai-engineering-plan-001",
+      "name": "AI - Generate Engineering Plan",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1,
+      "position": [850, 300],
+      "credentials": {
+        "openAiApi": {
+          "id": "1",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse the AI response and structure the engineering plan\nconst aiResponse = $input.item.json.response;\nlet engineeringPlan;\n\ntry {\n  // Try to parse if it's a string\n  engineeringPlan = typeof aiResponse === 'string' ? JSON.parse(aiResponse) : aiResponse;\n} catch (error) {\n  // If parsing fails, create a structured response from text\n  engineeringPlan = {\n    engineering_plan: {\n      raw_response: aiResponse,\n      parsing_error: error.message,\n      generated_at: new Date().toISOString()\n    }\n  };\n}\n\n// Add metadata\nconst result = {\n  ...engineeringPlan,\n  metadata: {\n    generated_by: 'Planning Agent - Engineering Plan Generator',\n    timestamp: new Date().toISOString(),\n    source_brd: $('Parse BRD Data').item.json.document_title,\n    version: '1.0'\n  }\n};\n\nreturn { json: result };"
+      },
+      "id": "format-output-001",
+      "name": "Format Engineering Plan Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "latest_engineering_plan",
+        "value": "={{JSON.stringify($json)}}"
+      },
+      "id": "save-state-001",
+      "name": "Save to State",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{JSON.stringify($json, null, 2)}}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "id": "webhook-response-001",
+      "name": "Respond with Engineering Plan",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Error handler\nconst errorMessage = $input.item.json.message || 'Unknown error occurred';\nconst errorStack = $input.item.json.stack || '';\n\nconst errorResponse = {\n  success: false,\n  error: {\n    message: errorMessage,\n    timestamp: new Date().toISOString(),\n    agent: 'Planning Agent - Engineering Plan Generator',\n    details: errorStack\n  }\n};\n\nreturn { json: errorResponse };"
+      },
+      "id": "error-handler-001",
+      "name": "Handle Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 500]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{JSON.stringify($json, null, 2)}}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "error-response-001",
+      "name": "Respond with Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [850, 500]
+    }
+  ],
+  "connections": {
+    "Webhook - Receive Parsed BRD": {
+      "main": [
+        [
+          {
+            "node": "Validate BRD Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate BRD Input": {
+      "main": [
+        [
+          {
+            "node": "Parse BRD Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Handle Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse BRD Data": {
+      "main": [
+        [
+          {
+            "node": "AI - Generate Engineering Plan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI - Generate Engineering Plan": {
+      "main": [
+        [
+          {
+            "node": "Format Engineering Plan Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Engineering Plan Output": {
+      "main": [
+        [
+          {
+            "node": "Save to State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save to State": {
+      "main": [
+        [
+          {
+            "node": "Respond with Engineering Plan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Error": {
+      "main": [
+        [
+          {
+            "node": "Respond with Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1.0",
+  "id": "planning-agent-engineering-plan",
+  "meta": {
+    "instanceId": "planning-agent-001"
+  },
+  "tags": [
+    {
+      "name": "planning-agent"
+    },
+    {
+      "name": "engineering-plan"
+    }
+  ]
+}
+
