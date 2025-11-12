@@ -44,37 +44,62 @@
     },
     {
       "parameters": {
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "anthropicApi",
-        "resource": "message",
-        "model": "claude-3-5-sonnet-20241022",
-        "text": "=You are an expert Software Engineering Manager and Technical Architect. Your task is to create a comprehensive, structured engineering plan based on a Business Requirements Document (BRD).\n\nInput BRD Summary:\n- Project: {{$json.document_title}}\n- Business Objectives: {{JSON.stringify($json.business_objectives)}}\n- Functional Requirements: {{JSON.stringify($json.functional_requirements)}}\n- Non-Functional Requirements: {{JSON.stringify($json.non_functional_requirements)}}\n- In Scope: {{JSON.stringify($json.in_scope)}}\n- Constraints: {{JSON.stringify($json.constraints)}}\n\nPlease generate a detailed Structured Engineering Plan in JSON format with the following structure:\n\n{\n  \"engineering_plan\": {\n    \"project_overview\": {\n      \"name\": \"string\",\n      \"description\": \"string\",\n      \"objectives\": [\"string\"]\n    },\n    \"feature_breakdown\": [\n      {\n        \"feature_id\": \"string\",\n        \"feature_name\": \"string\",\n        \"description\": \"string\",\n        \"priority\": \"Critical|High|Medium|Low\",\n        \"complexity\": \"High|Medium|Low\",\n        \"estimated_effort\": \"string (e.g., 2 weeks)\",\n        \"dependencies\": [\"string\"],\n        \"technical_requirements\": [\"string\"],\n        \"acceptance_criteria\": [\"string\"]\n      }\n    ],\n    \"technical_architecture\": {\n      \"system_components\": [\"string\"],\n      \"integration_points\": [\"string\"],\n      \"data_flow\": \"string\",\n      \"security_considerations\": [\"string\"]\n    },\n    \"implementation_phases\": [\n      {\n        \"phase_number\": \"number\",\n        \"phase_name\": \"string\",\n        \"description\": \"string\",\n        \"features_included\": [\"string\"],\n        \"estimated_duration\": \"string\",\n        \"deliverables\": [\"string\"]\n      }\n    ],\n    \"risk_analysis\": [\n      {\n        \"risk_id\": \"string\",\n        \"description\": \"string\",\n        \"impact\": \"High|Medium|Low\",\n        \"probability\": \"High|Medium|Low\",\n        \"mitigation_strategy\": \"string\"\n      }\n    ],\n    \"resource_requirements\": {\n      \"team_composition\": [\"string\"],\n      \"tools_and_technologies\": [\"string\"],\n      \"infrastructure_needs\": [\"string\"]\n    },\n    \"success_metrics\": [\n      {\n        \"metric_name\": \"string\",\n        \"target_value\": \"string\",\n        \"measurement_method\": \"string\"\n      }\n    ]\n  }\n}\n\nIMPORTANT: Return ONLY valid JSON, no markdown formatting, no explanation text. Start with { and end with }.\n\nBe thorough, specific, and actionable. Focus on technical feasibility and implementation details.",
-        "options": {
-          "temperature": 0.7,
-          "maxTokens": 4000
-        }
+        "jsCode": "// Prepare the prompt for Anthropic API\nconst data = $input.item.json;\n\nconst prompt = `You are an expert Software Engineering Manager and Technical Architect. Your task is to create a comprehensive, structured engineering plan based on a Business Requirements Document (BRD).\n\nInput BRD Summary:\n- Project: ${data.document_title}\n- Business Objectives: ${JSON.stringify(data.business_objectives)}\n- Functional Requirements: ${JSON.stringify(data.functional_requirements)}\n- Non-Functional Requirements: ${JSON.stringify(data.non_functional_requirements)}\n- In Scope: ${JSON.stringify(data.in_scope)}\n- Constraints: ${JSON.stringify(data.constraints)}\n\nPlease generate a detailed Structured Engineering Plan in JSON format with the following structure:\n\n{\n  \"engineering_plan\": {\n    \"project_overview\": {\n      \"name\": \"string\",\n      \"description\": \"string\",\n      \"objectives\": [\"string\"]\n    },\n    \"feature_breakdown\": [\n      {\n        \"feature_id\": \"string\",\n        \"feature_name\": \"string\",\n        \"description\": \"string\",\n        \"priority\": \"Critical|High|Medium|Low\",\n        \"complexity\": \"High|Medium|Low\",\n        \"estimated_effort\": \"string (e.g., 2 weeks)\",\n        \"dependencies\": [\"string\"],\n        \"technical_requirements\": [\"string\"],\n        \"acceptance_criteria\": [\"string\"]\n      }\n    ],\n    \"technical_architecture\": {\n      \"system_components\": [\"string\"],\n      \"integration_points\": [\"string\"],\n      \"data_flow\": \"string\",\n      \"security_considerations\": [\"string\"]\n    },\n    \"implementation_phases\": [\n      {\n        \"phase_number\": \"number\",\n        \"phase_name\": \"string\",\n        \"description\": \"string\",\n        \"features_included\": [\"string\"],\n        \"estimated_duration\": \"string\",\n        \"deliverables\": [\"string\"]\n      }\n    ],\n    \"risk_analysis\": [\n      {\n        \"risk_id\": \"string\",\n        \"description\": \"string\",\n        \"impact\": \"High|Medium|Low\",\n        \"probability\": \"High|Medium|Low\",\n        \"mitigation_strategy\": \"string\"\n      }\n    ],\n    \"resource_requirements\": {\n      \"team_composition\": [\"string\"],\n      \"tools_and_technologies\": [\"string\"],\n      \"infrastructure_needs\": [\"string\"]\n    },\n    \"success_metrics\": [\n      {\n        \"metric_name\": \"string\",\n        \"target_value\": \"string\",\n        \"measurement_method\": \"string\"\n      }\n    ]\n  }\n}\n\nIMPORTANT: Return ONLY valid JSON, no markdown formatting, no explanation text. Start with { and end with }.\n\nBe thorough, specific, and actionable. Focus on technical feasibility and implementation details.`;\n\nreturn {\n  json: {\n    prompt: prompt,\n    brd_data: data\n  }\n};"
+      },
+      "id": "prepare-prompt-001",
+      "name": "Prepare AI Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": []
+        },
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"claude-3-5-sonnet-20241022\",\n  \"max_tokens\": 4000,\n  \"temperature\": 0.7,\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": {{ JSON.stringify($json.prompt) }}\n    }\n  ]\n}",
+        "options": {}
       },
       "id": "ai-engineering-plan-001",
       "name": "AI - Generate Engineering Plan",
-      "type": "n8n-nodes-base.anthropic",
-      "typeVersion": 1,
-      "position": [850, 300],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1050, 300],
       "credentials": {
-        "anthropicApi": {
-          "id": "anthropic-credentials",
-          "name": "Anthropic API"
+        "httpHeaderAuth": {
+          "id": "anthropic-header-auth",
+          "name": "Anthropic Header Auth"
         }
       }
     },
     {
       "parameters": {
-        "jsCode": "// Parse the AI response and structure the engineering plan\nlet aiResponse = $input.item.json.message?.content?.[0]?.text || $input.item.json.text || $input.item.json.content || $input.item.json;\n\n// If aiResponse is already an object with engineering_plan, use it\nif (typeof aiResponse === 'object' && aiResponse.engineering_plan) {\n  return {\n    json: {\n      ...aiResponse,\n      metadata: {\n        generated_by: 'Planning Agent - Engineering Plan Generator',\n        timestamp: new Date().toISOString(),\n        source_brd: $('Parse BRD Data').item.json.document_title,\n        version: '1.0',\n        ai_model: 'Claude 3.5 Sonnet'\n      }\n    }\n  };\n}\n\n// Try to clean up markdown formatting if present\nif (typeof aiResponse === 'string') {\n  // Remove markdown code blocks\n  aiResponse = aiResponse.replace(/```json\\n?/g, '').replace(/```\\n?/g, '').trim();\n}\n\nlet engineeringPlan;\n\ntry {\n  // Try to parse if it's a string\n  engineeringPlan = typeof aiResponse === 'string' ? JSON.parse(aiResponse) : aiResponse;\n} catch (error) {\n  // If parsing fails, create a structured response from text\n  engineeringPlan = {\n    engineering_plan: {\n      raw_response: aiResponse,\n      parsing_error: error.message,\n      generated_at: new Date().toISOString(),\n      note: 'AI response could not be parsed as JSON'\n    }\n  };\n}\n\n// Add metadata\nconst result = {\n  ...engineeringPlan,\n  metadata: {\n    generated_by: 'Planning Agent - Engineering Plan Generator',\n    timestamp: new Date().toISOString(),\n    source_brd: $('Parse BRD Data').item.json.document_title,\n    version: '1.0',\n    ai_model: 'Claude 3.5 Sonnet'\n  }\n};\n\nreturn { json: result };"
+        "jsCode": "// Parse the Anthropic API response\nconst response = $input.item.json;\nlet aiResponse = response.content?.[0]?.text || '';\n\n// Try to clean up markdown formatting if present\nif (typeof aiResponse === 'string') {\n  aiResponse = aiResponse.replace(/```json\\n?/g, '').replace(/```\\n?/g, '').trim();\n}\n\nlet engineeringPlan;\n\ntry {\n  engineeringPlan = JSON.parse(aiResponse);\n} catch (error) {\n  engineeringPlan = {\n    engineering_plan: {\n      raw_response: aiResponse,\n      parsing_error: error.message,\n      generated_at: new Date().toISOString(),\n      note: 'AI response could not be parsed as JSON'\n    }\n  };\n}\n\n// Add metadata\nconst result = {\n  ...engineeringPlan,\n  metadata: {\n    generated_by: 'Planning Agent - Engineering Plan Generator',\n    timestamp: new Date().toISOString(),\n    source_brd: $('Parse BRD Data').item.json.document_title,\n    version: '1.0',\n    ai_model: 'Claude 3.5 Sonnet',\n    tokens_used: {\n      input: response.usage?.input_tokens || 0,\n      output: response.usage?.output_tokens || 0\n    }\n  }\n};\n\nreturn { json: result };"
       },
       "id": "format-output-001",
       "name": "Format Engineering Plan Output",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1050, 300]
+      "position": [1250, 300]
     },
     {
       "parameters": {
@@ -96,7 +121,7 @@
       "name": "Save to State",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.3,
-      "position": [1250, 300]
+      "position": [1450, 300]
     },
     {
       "parameters": {
@@ -118,7 +143,7 @@
       "name": "Respond with Engineering Plan",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [1450, 300]
+      "position": [1650, 300]
     },
     {
       "parameters": {
@@ -176,6 +201,17 @@
       ]
     },
     "Parse BRD Data": {
+      "main": [
+        [
+          {
+            "node": "Prepare AI Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare AI Prompt": {
       "main": [
         [
           {
