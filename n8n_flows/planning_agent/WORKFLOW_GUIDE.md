@@ -52,13 +52,18 @@ This directory contains two n8n workflows for the Planning Agent that transform 
 
 ### Step 2: Configure AI Credentials
 
-Both workflows use OpenAI for AI generation. You need to:
+Both workflows use **Anthropic (Claude)** for AI generation. You need to:
 
-1. Go to **Settings** → **Credentials**
-2. Add **OpenAI API** credentials:
-   - Name: `OpenAI API`
-   - API Key: Your OpenAI API key
-3. The workflows will automatically use these credentials
+1. Go to **Settings** → **Credentials** (or click the key 🔑 icon in the left sidebar)
+2. Click **Add Credential**
+3. Search for and select **Anthropic API**
+4. Add your credentials:
+   - Name: `Anthropic API`
+   - API Key: Your Anthropic API key (get it from https://console.anthropic.com/)
+5. Click **Save**
+6. The workflows will automatically use these credentials
+
+**Note:** These workflows use **Claude 3.5 Sonnet** which is excellent for technical planning tasks.
 
 ### Step 3: Activate Workflows
 
@@ -184,9 +189,10 @@ Respond with Schedule
 - Graceful error handling with detailed messages
 
 ### AI-Powered Generation
-- Uses GPT-4 for high-quality outputs
+- Uses **Claude 3.5 Sonnet** (Anthropic) for high-quality outputs
 - Structured prompts for consistent results
 - Configurable temperature and token limits
+- Better at following JSON format instructions than GPT-4
 
 ### State Management
 - Saves latest engineering plan to n8n state
@@ -362,9 +368,10 @@ To save additional data:
 
 ## ⚠️ Important Notes
 
-1. **API Keys Required**: You must configure OpenAI API credentials before using these workflows
-2. **Costs**: These workflows use GPT-4 which incurs API costs. Monitor your usage.
-3. **Rate Limits**: Be aware of OpenAI rate limits for high-volume usage
+1. **API Keys Required**: You must configure Anthropic API credentials before using these workflows
+2. **Costs**: These workflows use Claude 3.5 Sonnet which incurs API costs. Monitor your usage.
+   - Approximate cost: $3 per million input tokens, $15 per million output tokens
+3. **Rate Limits**: Be aware of Anthropic rate limits for high-volume usage
 4. **Webhook URLs**: Update webhook paths if you want custom endpoints
 5. **State Storage**: n8n state is in-memory by default. For persistence, configure database storage
 
@@ -376,9 +383,10 @@ To save additional data:
 - Check n8n logs for errors
 
 ### AI generation fails
-- Verify OpenAI API key is valid
+- Verify Anthropic API key is valid
 - Check API quota and limits
-- Review prompt length (max tokens)
+- Review prompt length (max tokens: 4000 for output)
+- Ensure you have credits in your Anthropic account
 
 ### Invalid output format
 - Check input data structure
@@ -393,7 +401,8 @@ To save additional data:
 ## 📚 Additional Resources
 
 - [n8n Documentation](https://docs.n8n.io/)
-- [OpenAI API Docs](https://platform.openai.com/docs/api-reference)
+- [Anthropic API Docs](https://docs.anthropic.com/en/api/getting-started)
+- [Claude Models](https://docs.anthropic.com/en/docs/models-overview)
 - [Project BRD Parser](../../brd_parser/README.md)
 - [Design Agent Workflows](../design_agent/README.md)
 

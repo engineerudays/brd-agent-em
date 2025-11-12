@@ -44,14 +44,11 @@
     },
     {
       "parameters": {
-        "model": "gpt-4",
-        "messages": {
-          "values": [
-            {
-              "content": "=You are an expert Project Manager and Engineering Leader specializing in software project scheduling and resource planning.\n\nBased on the following Engineering Plan, create a detailed Project Schedule:\n\nProject: {{$json.project_name}}\nTotal Features: {{$json.total_features}}\nImplementation Phases: {{$json.phases}}\nFeatures Details: {{$json.features}}\nRisks: {{$json.risks}}\nResource Requirements: {{$json.resources}}\n\nGenerate a comprehensive Project Schedule in JSON format with this structure:\n\n{\n  \"project_schedule\": {\n    \"project_info\": {\n      \"project_name\": \"string\",\n      \"start_date\": \"YYYY-MM-DD\",\n      \"estimated_end_date\": \"YYYY-MM-DD\",\n      \"total_duration_weeks\": \"number\",\n      \"total_effort_person_weeks\": \"number\"\n    },\n    \"phases\": [\n      {\n        \"phase_id\": \"string\",\n        \"phase_name\": \"string\",\n        \"start_date\": \"YYYY-MM-DD\",\n        \"end_date\": \"YYYY-MM-DD\",\n        \"duration_weeks\": \"number\",\n        \"milestones\": [\n          {\n            \"milestone_id\": \"string\",\n            \"name\": \"string\",\n            \"target_date\": \"YYYY-MM-DD\",\n            \"deliverables\": [\"string\"],\n            \"dependencies\": [\"string\"]\n          }\n        ],\n        \"tasks\": [\n          {\n            \"task_id\": \"string\",\n            \"task_name\": \"string\",\n            \"description\": \"string\",\n            \"assigned_to\": \"string (role)\",\n            \"start_date\": \"YYYY-MM-DD\",\n            \"end_date\": \"YYYY-MM-DD\",\n            \"effort_days\": \"number\",\n            \"status\": \"Not Started|In Progress|Completed\",\n            \"dependencies\": [\"string\"],\n            \"priority\": \"Critical|High|Medium|Low\"\n          }\n        ]\n      }\n    ],\n    \"resource_allocation\": [\n      {\n        \"role\": \"string\",\n        \"allocation_percentage\": \"number\",\n        \"start_date\": \"YYYY-MM-DD\",\n        \"end_date\": \"YYYY-MM-DD\",\n        \"key_responsibilities\": [\"string\"]\n      }\n    ],\n    \"critical_path\": [\n      {\n        \"task_id\": \"string\",\n        \"task_name\": \"string\",\n        \"duration_days\": \"number\",\n        \"slack_days\": \"number\"\n      }\n    ],\n    \"risk_timeline\": [\n      {\n        \"risk_id\": \"string\",\n        \"description\": \"string\",\n        \"impact_on_schedule\": \"string\",\n        \"contingency_buffer_days\": \"number\"\n      }\n    ],\n    \"key_deliverables\": [\n      {\n        \"deliverable_name\": \"string\",\n        \"due_date\": \"YYYY-MM-DD\",\n        \"responsible_team\": \"string\",\n        \"dependencies\": [\"string\"]\n      }\n    ],\n    \"assumptions\": [\"string\"],\n    \"constraints\": [\"string\"]\n  }\n}\n\nAssume today's date as the project start date. Be realistic with timelines, account for dependencies, and include buffer time for risks. Provide specific dates and detailed task breakdowns."
-            }
-          ]
-        },
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "anthropicApi",
+        "resource": "message",
+        "model": "claude-3-5-sonnet-20241022",
+        "text": "=You are an expert Project Manager and Engineering Leader specializing in software project scheduling and resource planning.\n\nBased on the following Engineering Plan, create a detailed Project Schedule:\n\nProject: {{$json.project_name}}\nTotal Features: {{$json.total_features}}\nImplementation Phases: {{JSON.stringify($json.phases)}}\nFeatures Details: {{JSON.stringify($json.features)}}\nRisks: {{JSON.stringify($json.risks)}}\nResource Requirements: {{JSON.stringify($json.resources)}}\n\nGenerate a comprehensive Project Schedule in JSON format with this structure:\n\n{\n  \"project_schedule\": {\n    \"project_info\": {\n      \"project_name\": \"string\",\n      \"start_date\": \"YYYY-MM-DD\",\n      \"estimated_end_date\": \"YYYY-MM-DD\",\n      \"total_duration_weeks\": \"number\",\n      \"total_effort_person_weeks\": \"number\"\n    },\n    \"phases\": [\n      {\n        \"phase_id\": \"string\",\n        \"phase_name\": \"string\",\n        \"start_date\": \"YYYY-MM-DD\",\n        \"end_date\": \"YYYY-MM-DD\",\n        \"duration_weeks\": \"number\",\n        \"milestones\": [\n          {\n            \"milestone_id\": \"string\",\n            \"name\": \"string\",\n            \"target_date\": \"YYYY-MM-DD\",\n            \"deliverables\": [\"string\"],\n            \"dependencies\": [\"string\"]\n          }\n        ],\n        \"tasks\": [\n          {\n            \"task_id\": \"string\",\n            \"task_name\": \"string\",\n            \"description\": \"string\",\n            \"assigned_to\": \"string (role)\",\n            \"start_date\": \"YYYY-MM-DD\",\n            \"end_date\": \"YYYY-MM-DD\",\n            \"effort_days\": \"number\",\n            \"status\": \"Not Started|In Progress|Completed\",\n            \"dependencies\": [\"string\"],\n            \"priority\": \"Critical|High|Medium|Low\"\n          }\n        ]\n      }\n    ],\n    \"resource_allocation\": [\n      {\n        \"role\": \"string\",\n        \"allocation_percentage\": \"number\",\n        \"start_date\": \"YYYY-MM-DD\",\n        \"end_date\": \"YYYY-MM-DD\",\n        \"key_responsibilities\": [\"string\"]\n      }\n    ],\n    \"critical_path\": [\n      {\n        \"task_id\": \"string\",\n        \"task_name\": \"string\",\n        \"duration_days\": \"number\",\n        \"slack_days\": \"number\"\n      }\n    ],\n    \"risk_timeline\": [\n      {\n        \"risk_id\": \"string\",\n        \"description\": \"string\",\n        \"impact_on_schedule\": \"string\",\n        \"contingency_buffer_days\": \"number\"\n      }\n    ],\n    \"key_deliverables\": [\n      {\n        \"deliverable_name\": \"string\",\n        \"due_date\": \"YYYY-MM-DD\",\n        \"responsible_team\": \"string\",\n        \"dependencies\": [\"string\"]\n      }\n    ],\n    \"assumptions\": [\"string\"],\n    \"constraints\": [\"string\"]\n  }\n}\n\nIMPORTANT: Return ONLY valid JSON, no markdown formatting, no explanation text. Start with { and end with }.\n\nAssume today's date as the project start date. Be realistic with timelines, account for dependencies, and include buffer time for risks. Provide specific dates and detailed task breakdowns.",
         "options": {
           "temperature": 0.7,
           "maxTokens": 4000
@@ -59,19 +56,19 @@
       },
       "id": "ai-schedule-001",
       "name": "AI - Generate Project Schedule",
-      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "type": "n8n-nodes-base.anthropic",
       "typeVersion": 1,
       "position": [850, 300],
       "credentials": {
-        "openAiApi": {
-          "id": "1",
-          "name": "OpenAI API"
+        "anthropicApi": {
+          "id": "anthropic-credentials",
+          "name": "Anthropic API"
         }
       }
     },
     {
       "parameters": {
-        "jsCode": "// Parse and validate the AI-generated schedule\nconst aiResponse = $input.item.json.response;\nlet projectSchedule;\n\ntry {\n  projectSchedule = typeof aiResponse === 'string' ? JSON.parse(aiResponse) : aiResponse;\n} catch (error) {\n  projectSchedule = {\n    project_schedule: {\n      raw_response: aiResponse,\n      parsing_error: error.message,\n      generated_at: new Date().toISOString()\n    }\n  };\n}\n\n// Calculate summary statistics\nconst phases = projectSchedule.project_schedule?.phases || [];\nconst totalTasks = phases.reduce((sum, phase) => sum + (phase.tasks?.length || 0), 0);\nconst totalMilestones = phases.reduce((sum, phase) => sum + (phase.milestones?.length || 0), 0);\n\n// Add metadata and summary\nconst result = {\n  ...projectSchedule,\n  summary: {\n    total_phases: phases.length,\n    total_tasks: totalTasks,\n    total_milestones: totalMilestones,\n    generated_at: new Date().toISOString()\n  },\n  metadata: {\n    generated_by: 'Planning Agent - Project Schedule Generator',\n    timestamp: new Date().toISOString(),\n    source_plan: $('Parse Engineering Plan').item.json.project_name,\n    version: '1.0'\n  }\n};\n\nreturn { json: result };"
+        "jsCode": "// Parse and validate the AI-generated schedule\nlet aiResponse = $input.item.json.message?.content?.[0]?.text || $input.item.json.text || $input.item.json.content || $input.item.json;\n\n// Try to clean up markdown formatting if present\nif (typeof aiResponse === 'string') {\n  aiResponse = aiResponse.replace(/```json\\n?/g, '').replace(/```\\n?/g, '').trim();\n}\n\nlet projectSchedule;\n\ntry {\n  projectSchedule = typeof aiResponse === 'string' ? JSON.parse(aiResponse) : aiResponse;\n} catch (error) {\n  projectSchedule = {\n    project_schedule: {\n      raw_response: aiResponse,\n      parsing_error: error.message,\n      generated_at: new Date().toISOString(),\n      note: 'AI response could not be parsed as JSON'\n    }\n  };\n}\n\n// Calculate summary statistics\nconst phases = projectSchedule.project_schedule?.phases || [];\nconst totalTasks = phases.reduce((sum, phase) => sum + (phase.tasks?.length || 0), 0);\nconst totalMilestones = phases.reduce((sum, phase) => sum + (phase.milestones?.length || 0), 0);\n\n// Add metadata and summary\nconst result = {\n  ...projectSchedule,\n  summary: {\n    total_phases: phases.length,\n    total_tasks: totalTasks,\n    total_milestones: totalMilestones,\n    generated_at: new Date().toISOString()\n  },\n  metadata: {\n    generated_by: 'Planning Agent - Project Schedule Generator',\n    timestamp: new Date().toISOString(),\n    source_plan: $('Parse Engineering Plan').item.json.project_name,\n    version: '1.0',\n    ai_model: 'Claude 3.5 Sonnet'\n  }\n};\n\nreturn { json: result };"
       },
       "id": "format-schedule-001",
       "name": "Format Schedule Output",
@@ -91,26 +88,46 @@
     },
     {
       "parameters": {
-        "operation": "set",
-        "key": "latest_project_schedule",
-        "value": "={{JSON.stringify($('Format Schedule Output').item.json)}}"
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "state-002",
+              "name": "latest_project_schedule",
+              "value": "={{JSON.stringify($('Format Schedule Output').item.json)}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
       },
       "id": "save-schedule-state-001",
       "name": "Save Schedule to State",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 1,
+      "typeVersion": 3.3,
       "position": [1250, 450]
     },
     {
       "parameters": {
-        "operation": "set",
-        "key": "latest_gantt_data",
-        "value": "={{JSON.stringify($json)}}"
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "state-003",
+              "name": "latest_gantt_data",
+              "value": "={{JSON.stringify($json)}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
       },
       "id": "save-gantt-state-001",
       "name": "Save Gantt Data to State",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 1,
+      "typeVersion": 3.3,
       "position": [1450, 300]
     },
     {
@@ -147,7 +164,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Error handler for schedule generation\nconst errorMessage = $input.item.json.message || 'Unknown error occurred';\nconst errorStack = $input.item.json.stack || '';\n\nconst errorResponse = {\n  success: false,\n  error: {\n    message: errorMessage,\n    timestamp: new Date().toISOString(),\n    agent: 'Planning Agent - Project Schedule Generator',\n    details: errorStack\n  }\n};\n\nreturn { json: errorResponse };"
+        "jsCode": "// Error handler for schedule generation\nconst errorMessage = $input.item.json.message || 'Invalid engineering plan - engineering_plan is required';\nconst errorStack = $input.item.json.stack || '';\n\nconst errorResponse = {\n  success: false,\n  error: {\n    message: errorMessage,\n    timestamp: new Date().toISOString(),\n    agent: 'Planning Agent - Project Schedule Generator',\n    details: errorStack\n  }\n};\n\nreturn { json: errorResponse };"
       },
       "id": "error-handler-002",
       "name": "Handle Schedule Error",
@@ -301,4 +318,3 @@
     }
   ]
 }
-

@@ -44,14 +44,11 @@
     },
     {
       "parameters": {
-        "model": "gpt-4",
-        "messages": {
-          "values": [
-            {
-              "content": "=You are an expert Software Engineering Manager and Technical Architect. Your task is to create a comprehensive, structured engineering plan based on a Business Requirements Document (BRD).\n\nInput BRD Summary:\n- Project: {{$json.document_title}}\n- Business Objectives: {{$json.business_objectives}}\n- Functional Requirements: {{$json.functional_requirements}}\n- Non-Functional Requirements: {{$json.non_functional_requirements}}\n- In Scope: {{$json.in_scope}}\n- Constraints: {{$json.constraints}}\n\nPlease generate a detailed Structured Engineering Plan in JSON format with the following structure:\n\n{\n  \"engineering_plan\": {\n    \"project_overview\": {\n      \"name\": \"string\",\n      \"description\": \"string\",\n      \"objectives\": [\"string\"]\n    },\n    \"feature_breakdown\": [\n      {\n        \"feature_id\": \"string\",\n        \"feature_name\": \"string\",\n        \"description\": \"string\",\n        \"priority\": \"Critical|High|Medium|Low\",\n        \"complexity\": \"High|Medium|Low\",\n        \"estimated_effort\": \"string (e.g., 2 weeks)\",\n        \"dependencies\": [\"string\"],\n        \"technical_requirements\": [\"string\"],\n        \"acceptance_criteria\": [\"string\"]\n      }\n    ],\n    \"technical_architecture\": {\n      \"system_components\": [\"string\"],\n      \"integration_points\": [\"string\"],\n      \"data_flow\": \"string\",\n      \"security_considerations\": [\"string\"]\n    },\n    \"implementation_phases\": [\n      {\n        \"phase_number\": \"number\",\n        \"phase_name\": \"string\",\n        \"description\": \"string\",\n        \"features_included\": [\"string\"],\n        \"estimated_duration\": \"string\",\n        \"deliverables\": [\"string\"]\n      }\n    ],\n    \"risk_analysis\": [\n      {\n        \"risk_id\": \"string\",\n        \"description\": \"string\",\n        \"impact\": \"High|Medium|Low\",\n        \"probability\": \"High|Medium|Low\",\n        \"mitigation_strategy\": \"string\"\n      }\n    ],\n    \"resource_requirements\": {\n      \"team_composition\": [\"string\"],\n      \"tools_and_technologies\": [\"string\"],\n      \"infrastructure_needs\": [\"string\"]\n    },\n    \"success_metrics\": [\n      {\n        \"metric_name\": \"string\",\n        \"target_value\": \"string\",\n        \"measurement_method\": \"string\"\n      }\n    ]\n  }\n}\n\nBe thorough, specific, and actionable. Focus on technical feasibility and implementation details."
-            }
-          ]
-        },
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "anthropicApi",
+        "resource": "message",
+        "model": "claude-3-5-sonnet-20241022",
+        "text": "=You are an expert Software Engineering Manager and Technical Architect. Your task is to create a comprehensive, structured engineering plan based on a Business Requirements Document (BRD).\n\nInput BRD Summary:\n- Project: {{$json.document_title}}\n- Business Objectives: {{JSON.stringify($json.business_objectives)}}\n- Functional Requirements: {{JSON.stringify($json.functional_requirements)}}\n- Non-Functional Requirements: {{JSON.stringify($json.non_functional_requirements)}}\n- In Scope: {{JSON.stringify($json.in_scope)}}\n- Constraints: {{JSON.stringify($json.constraints)}}\n\nPlease generate a detailed Structured Engineering Plan in JSON format with the following structure:\n\n{\n  \"engineering_plan\": {\n    \"project_overview\": {\n      \"name\": \"string\",\n      \"description\": \"string\",\n      \"objectives\": [\"string\"]\n    },\n    \"feature_breakdown\": [\n      {\n        \"feature_id\": \"string\",\n        \"feature_name\": \"string\",\n        \"description\": \"string\",\n        \"priority\": \"Critical|High|Medium|Low\",\n        \"complexity\": \"High|Medium|Low\",\n        \"estimated_effort\": \"string (e.g., 2 weeks)\",\n        \"dependencies\": [\"string\"],\n        \"technical_requirements\": [\"string\"],\n        \"acceptance_criteria\": [\"string\"]\n      }\n    ],\n    \"technical_architecture\": {\n      \"system_components\": [\"string\"],\n      \"integration_points\": [\"string\"],\n      \"data_flow\": \"string\",\n      \"security_considerations\": [\"string\"]\n    },\n    \"implementation_phases\": [\n      {\n        \"phase_number\": \"number\",\n        \"phase_name\": \"string\",\n        \"description\": \"string\",\n        \"features_included\": [\"string\"],\n        \"estimated_duration\": \"string\",\n        \"deliverables\": [\"string\"]\n      }\n    ],\n    \"risk_analysis\": [\n      {\n        \"risk_id\": \"string\",\n        \"description\": \"string\",\n        \"impact\": \"High|Medium|Low\",\n        \"probability\": \"High|Medium|Low\",\n        \"mitigation_strategy\": \"string\"\n      }\n    ],\n    \"resource_requirements\": {\n      \"team_composition\": [\"string\"],\n      \"tools_and_technologies\": [\"string\"],\n      \"infrastructure_needs\": [\"string\"]\n    },\n    \"success_metrics\": [\n      {\n        \"metric_name\": \"string\",\n        \"target_value\": \"string\",\n        \"measurement_method\": \"string\"\n      }\n    ]\n  }\n}\n\nIMPORTANT: Return ONLY valid JSON, no markdown formatting, no explanation text. Start with { and end with }.\n\nBe thorough, specific, and actionable. Focus on technical feasibility and implementation details.",
         "options": {
           "temperature": 0.7,
           "maxTokens": 4000
@@ -59,19 +56,19 @@
       },
       "id": "ai-engineering-plan-001",
       "name": "AI - Generate Engineering Plan",
-      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "type": "n8n-nodes-base.anthropic",
       "typeVersion": 1,
       "position": [850, 300],
       "credentials": {
-        "openAiApi": {
-          "id": "1",
-          "name": "OpenAI API"
+        "anthropicApi": {
+          "id": "anthropic-credentials",
+          "name": "Anthropic API"
         }
       }
     },
     {
       "parameters": {
-        "jsCode": "// Parse the AI response and structure the engineering plan\nconst aiResponse = $input.item.json.response;\nlet engineeringPlan;\n\ntry {\n  // Try to parse if it's a string\n  engineeringPlan = typeof aiResponse === 'string' ? JSON.parse(aiResponse) : aiResponse;\n} catch (error) {\n  // If parsing fails, create a structured response from text\n  engineeringPlan = {\n    engineering_plan: {\n      raw_response: aiResponse,\n      parsing_error: error.message,\n      generated_at: new Date().toISOString()\n    }\n  };\n}\n\n// Add metadata\nconst result = {\n  ...engineeringPlan,\n  metadata: {\n    generated_by: 'Planning Agent - Engineering Plan Generator',\n    timestamp: new Date().toISOString(),\n    source_brd: $('Parse BRD Data').item.json.document_title,\n    version: '1.0'\n  }\n};\n\nreturn { json: result };"
+        "jsCode": "// Parse the AI response and structure the engineering plan\nlet aiResponse = $input.item.json.message?.content?.[0]?.text || $input.item.json.text || $input.item.json.content || $input.item.json;\n\n// If aiResponse is already an object with engineering_plan, use it\nif (typeof aiResponse === 'object' && aiResponse.engineering_plan) {\n  return {\n    json: {\n      ...aiResponse,\n      metadata: {\n        generated_by: 'Planning Agent - Engineering Plan Generator',\n        timestamp: new Date().toISOString(),\n        source_brd: $('Parse BRD Data').item.json.document_title,\n        version: '1.0',\n        ai_model: 'Claude 3.5 Sonnet'\n      }\n    }\n  };\n}\n\n// Try to clean up markdown formatting if present\nif (typeof aiResponse === 'string') {\n  // Remove markdown code blocks\n  aiResponse = aiResponse.replace(/```json\\n?/g, '').replace(/```\\n?/g, '').trim();\n}\n\nlet engineeringPlan;\n\ntry {\n  // Try to parse if it's a string\n  engineeringPlan = typeof aiResponse === 'string' ? JSON.parse(aiResponse) : aiResponse;\n} catch (error) {\n  // If parsing fails, create a structured response from text\n  engineeringPlan = {\n    engineering_plan: {\n      raw_response: aiResponse,\n      parsing_error: error.message,\n      generated_at: new Date().toISOString(),\n      note: 'AI response could not be parsed as JSON'\n    }\n  };\n}\n\n// Add metadata\nconst result = {\n  ...engineeringPlan,\n  metadata: {\n    generated_by: 'Planning Agent - Engineering Plan Generator',\n    timestamp: new Date().toISOString(),\n    source_brd: $('Parse BRD Data').item.json.document_title,\n    version: '1.0',\n    ai_model: 'Claude 3.5 Sonnet'\n  }\n};\n\nreturn { json: result };"
       },
       "id": "format-output-001",
       "name": "Format Engineering Plan Output",
@@ -81,14 +78,24 @@
     },
     {
       "parameters": {
-        "operation": "set",
-        "key": "latest_engineering_plan",
-        "value": "={{JSON.stringify($json)}}"
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "state-001",
+              "name": "latest_engineering_plan",
+              "value": "={{JSON.stringify($json)}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
       },
       "id": "save-state-001",
       "name": "Save to State",
       "type": "n8n-nodes-base.set",
-      "typeVersion": 1,
+      "typeVersion": 3.3,
       "position": [1250, 300]
     },
     {
@@ -115,7 +122,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Error handler\nconst errorMessage = $input.item.json.message || 'Unknown error occurred';\nconst errorStack = $input.item.json.stack || '';\n\nconst errorResponse = {\n  success: false,\n  error: {\n    message: errorMessage,\n    timestamp: new Date().toISOString(),\n    agent: 'Planning Agent - Engineering Plan Generator',\n    details: errorStack\n  }\n};\n\nreturn { json: errorResponse };"
+        "jsCode": "// Error handler\nconst errorMessage = $input.item.json.message || 'Invalid BRD input - raw_brd_text is required';\nconst errorStack = $input.item.json.stack || '';\n\nconst errorResponse = {\n  success: false,\n  error: {\n    message: errorMessage,\n    timestamp: new Date().toISOString(),\n    agent: 'Planning Agent - Engineering Plan Generator',\n    details: errorStack\n  }\n};\n\nreturn { json: errorResponse };"
       },
       "id": "error-handler-001",
       "name": "Handle Error",
@@ -242,4 +249,3 @@
     }
   ]
 }
-
