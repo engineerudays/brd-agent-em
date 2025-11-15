@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n-brd-agent
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      # Timezone
+      - TZ=America/Los_Angeles
+      
+      # Basic Auth (Optional - comment out if not needed)
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=change-this-password
+      
+      # Execution settings
+      - EXECUTIONS_PROCESS=main
+      - EXECUTIONS_TIMEOUT=3600
+      - EXECUTIONS_TIMEOUT_MAX=7200
+      
+      # Webhook URL (adjust if using a custom domain)
+      - WEBHOOK_URL=http://localhost:5678/
+    
+    volumes:
+      # n8n data persistence
+      - ~/.n8n:/home/node/.n8n
+      
+      # Mount your entire projects folder
+      - /Users/udayammanagi/Udays-Folder:/data/projects
+    
+    networks:
+      - n8n-network
+
+networks:
+  n8n-network:
+    driver: bridge
+
+# To use this:
+# 1. Save this file as docker-compose.yml in your project root
+# 2. Run: docker-compose up -d
+# 3. Access n8n at: http://localhost:5678
+# 4. Login with: admin / change-this-password (change these!)
+# 5. Import your workflows from n8n_flows/planning_agent/
+
+# Useful commands:
+# - Start: docker-compose up -d
+# - Stop: docker-compose down
+# - View logs: docker-compose logs -f n8n
+# - Restart: docker-compose restart
+
