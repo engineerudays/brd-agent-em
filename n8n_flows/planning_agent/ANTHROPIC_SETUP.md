@@ -139,23 +139,25 @@ The HTTP Request node calls Anthropic's Messages API:
 
 If you encounter model errors, you can change the model in the HTTP Request node. Available models:
 
-- **`claude-3-5-sonnet-20240620`** ✅ **(Recommended - Used by default)**
-  - Best balance of intelligence, speed, and cost
-  - Excellent for technical tasks
+- **`claude-3-haiku-20240307`** ✅ **(Default - Most Compatible)**
+  - Fastest and most cost-effective
+  - Widely available across all regions
+  - Excellent for structured planning tasks
+  - $0.25 input / $1.25 output per million tokens
   
-- **`claude-3-opus-20240229`**
-  - Most capable model
-  - Higher cost ($15 input / $75 output per million tokens)
-  - Use for complex planning
+- **`claude-3-5-sonnet-20240620`**
+  - Best balance of intelligence, speed, and cost
+  - May require specific API access
+  - Excellent for complex technical tasks
 
 - **`claude-3-sonnet-20240229`**
-  - Good performance, lower cost
-  - Reliable and stable
+  - Good performance, moderate cost
+  - May not be available in all regions
 
-- **`claude-3-haiku-20240307`**
-  - Fastest and cheapest
-  - Good for simpler tasks
-  - $0.25 input / $1.25 output per million tokens
+- **`claude-3-opus-20240229`**
+  - Most capable model
+  - Highest cost ($15 input / $75 output per million tokens)
+  - May require upgraded API access
 
 To change the model:
 1. Open the workflow
