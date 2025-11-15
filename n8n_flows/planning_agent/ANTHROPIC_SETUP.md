@@ -123,7 +123,7 @@ The HTTP Request node calls Anthropic's Messages API:
 
 ```json
 {
-  "model": "claude-3-5-sonnet-20241022",
+  "model": "claude-3-5-sonnet-20240620",
   "max_tokens": 4000,
   "temperature": 0.7,
   "messages": [
@@ -134,6 +134,35 @@ The HTTP Request node calls Anthropic's Messages API:
   ]
 }
 ```
+
+### Available Claude Models
+
+If you encounter model errors, you can change the model in the HTTP Request node. Available models:
+
+- **`claude-3-5-sonnet-20240620`** ✅ **(Recommended - Used by default)**
+  - Best balance of intelligence, speed, and cost
+  - Excellent for technical tasks
+  
+- **`claude-3-opus-20240229`**
+  - Most capable model
+  - Higher cost ($15 input / $75 output per million tokens)
+  - Use for complex planning
+
+- **`claude-3-sonnet-20240229`**
+  - Good performance, lower cost
+  - Reliable and stable
+
+- **`claude-3-haiku-20240307`**
+  - Fastest and cheapest
+  - Good for simpler tasks
+  - $0.25 input / $1.25 output per million tokens
+
+To change the model:
+1. Open the workflow
+2. Click **"AI - Generate..."** node
+3. Edit the **JSON Body**
+4. Change the `"model"` value
+5. Save and test
 
 With the header:
 ```
