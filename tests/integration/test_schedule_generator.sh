@@ -4,7 +4,7 @@
 # Usage: ./test_schedule_generator.sh <path-to-engineering-plan.json>
 
 ENGINEERING_PLAN_FILE="$1"
-N8N_URL="http://localhost:5678/webhook/planning-agent/project-schedule"
+N8N_URL="http://localhost:5678/webhook-test/planning-agent/project-schedule"
 
 if [ -z "$ENGINEERING_PLAN_FILE" ]; then
   echo "🗓️  Project Schedule Generator - Test Script"

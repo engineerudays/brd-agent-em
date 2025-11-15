@@ -24,10 +24,16 @@ The **Project Schedule Generator** takes an Engineering Plan as input and genera
 
 ### Step 2: Verify Webhook URL
 
-The webhook should be available at:
+The webhook is available at:
 ```
+# For testing (recommended)
+POST http://localhost:5678/webhook-test/planning-agent/project-schedule
+
+# For production (when workflow is activated)
 POST http://localhost:5678/webhook/planning-agent/project-schedule
 ```
+
+**Note**: Use `/webhook-test/` during development and testing!
 
 ---
 
@@ -40,13 +46,12 @@ You already have engineering plans generated! Use one of them:
 ```bash
 cd /Users/udayammanagi/Udays-Folder/IK/brd_agent_em
 
-# Use your existing engineering plan
-curl -X POST http://localhost:5678/webhook/planning-agent/project-schedule \
+# Use your existing engineering plan (needs to be wrapped)
+jq '{engineering_plan: .}' sample_inputs/outputs/engineering_plans/engineering_plan_customer_onboarding_and_success_portal_cosp_brd_v1_2025-11-15T15-07-55.json | \
+curl -X POST http://localhost:5678/webhook-test/planning-agent/project-schedule \
   -H "Content-Type: application/json" \
-  -d @sample_inputs/outputs/engineering_plans/engineering_plan_customer_onboarding_and_success_portal_cosp_brd_v1_2025-11-15T15-07-55.json
+  -d @-
 ```
-
-**Wait!** The file format needs to be wrapped. Let me create a test script for you...
 
 ### Option 2: Two-Step Process (Generate → Schedule)
 
@@ -64,7 +69,7 @@ curl -X POST http://localhost:5678/webhook/planning-agent/engineering-plan \
 ```bash
 # Wrap the engineering plan in the expected format
 jq '{engineering_plan: .}' /tmp/eng_plan.json | \
-curl -X POST http://localhost:5678/webhook/planning-agent/project-schedule \
+curl -X POST http://localhost:5678/webhook-test/planning-agent/project-schedule \
   -H "Content-Type: application/json" \
   -d @-
 ```
@@ -83,7 +88,7 @@ We have a simple test script that handles the format conversion:
 # Test Project Schedule Generator
 
 ENGINEERING_PLAN_FILE="$1"
-N8N_URL="http://localhost:5678/webhook/planning-agent/project-schedule"
+N8N_URL="http://localhost:5678/webhook-test/planning-agent/project-schedule"
 
 if [ -z "$ENGINEERING_PLAN_FILE" ]; then
   echo "Usage: tests/integration/test_schedule_generator.sh <path-to-engineering-plan.json>"
@@ -147,7 +152,7 @@ echo "Using plan: $LATEST_PLAN"
 
 # Wrap and send
 jq '{engineering_plan: .}' "$LATEST_PLAN" | \
-curl -X POST http://localhost:5678/webhook/planning-agent/project-schedule \
+curl -X POST http://localhost:5678/webhook-test/planning-agent/project-schedule \
   -H "Content-Type: application/json" \
   -d @- | jq '.'
 ```
@@ -161,7 +166,7 @@ cd /Users/udayammanagi/Udays-Folder/IK/brd_agent_em
 PLAN_CONTENT=$(cat sample_inputs/outputs/engineering_plans/engineering_plan_customer_onboarding_and_success_portal_cosp_brd_v1_2025-11-15T15-07-55.json)
 
 # Send wrapped payload
-curl -X POST http://localhost:5678/webhook/planning-agent/project-schedule \
+curl -X POST http://localhost:5678/webhook-test/planning-agent/project-schedule \
   -H "Content-Type: application/json" \
   -d "{\"engineering_plan\": $PLAN_CONTENT}" | jq '.'
 ```
@@ -253,7 +258,7 @@ cat /tmp/current_eng_plan.json | jq '.'
 echo ""
 echo "🗓️ Step 2: Generating Project Schedule..."
 jq '{engineering_plan: .}' /tmp/current_eng_plan.json | \
-curl -s -X POST http://localhost:5678/webhook/planning-agent/project-schedule \
+curl -s -X POST http://localhost:5678/webhook-test/planning-agent/project-schedule \
   -H "Content-Type: application/json" \
   -d @- | jq '.'
 
