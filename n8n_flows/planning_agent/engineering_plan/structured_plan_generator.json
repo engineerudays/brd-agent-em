@@ -93,7 +93,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Parse the Anthropic API response\nconst response = $input.item.json;\nlet aiResponse = response.content?.[0]?.text || '';\n\n// Try to clean up markdown formatting if present\nif (typeof aiResponse === 'string') {\n  aiResponse = aiResponse.replace(/```json\\n?/g, '').replace(/```\\n?/g, '').trim();\n}\n\nlet engineeringPlan;\n\ntry {\n  engineeringPlan = JSON.parse(aiResponse);\n} catch (error) {\n  engineeringPlan = {\n    engineering_plan: {\n      raw_response: aiResponse,\n      parsing_error: error.message,\n      generated_at: new Date().toISOString(),\n      note: 'AI response could not be parsed as JSON'\n    }\n  };\n}\n\n// Add metadata\nconst result = {\n  ...engineeringPlan,\n  metadata: {\n    generated_by: 'Planning Agent - Engineering Plan Generator',\n    timestamp: new Date().toISOString(),\n    source_brd: $('Parse BRD Data').item.json.document_title,\n    version: '1.0',\n    ai_model: 'Claude 3.5 Sonnet',\n    tokens_used: {\n      input: response.usage?.input_tokens || 0,\n      output: response.usage?.output_tokens || 0\n    }\n  }\n};\n\nreturn { json: result };"
+        "jsCode": "// Parse the Anthropic API response\nconst response = $input.item.json;\nlet aiResponse = response.content?.[0]?.text || '';\n\n// Try to clean up markdown formatting if present\nif (typeof aiResponse === 'string') {\n  aiResponse = aiResponse.replace(/```json\\n?/g, '').replace(/```\\n?/g, '').trim();\n}\n\nlet engineeringPlan;\n\ntry {\n  engineeringPlan = JSON.parse(aiResponse);\n} catch (error) {\n  engineeringPlan = {\n    engineering_plan: {\n      raw_response: aiResponse,\n      parsing_error: error.message,\n      generated_at: new Date().toISOString(),\n      note: 'AI response could not be parsed as JSON'\n    }\n  };\n}\n\n// Add metadata\nconst result = {\n  ...engineeringPlan,\n  metadata: {\n    generated_by: 'Planning Agent - Engineering Plan Generator',\n    timestamp: new Date().toISOString(),\n    source_brd: $('Parse BRD Data').item.json.document_title,\n    version: '1.0',\n    ai_model: 'Claude 3 Haiku',\n    tokens_used: {\n      input: response.usage?.input_tokens || 0,\n      output: response.usage?.output_tokens || 0\n    }\n  }\n};\n\nreturn { json: result };"
       },
       "id": "format-output-001",
       "name": "Format Engineering Plan Output",
@@ -125,6 +125,16 @@
     },
     {
       "parameters": {
+        "jsCode": "const fs = require('fs');\nconst path = require('path');\n\n// Get the engineering plan data\nconst planData = $input.item.json;\nconst brdName = planData.metadata?.source_brd || 'unknown_project';\n\n// Sanitize BRD name for filename (lowercase, replace spaces with underscores, remove special chars)\nconst sanitizedName = brdName\n  .toLowerCase()\n  .replace(/\\s+/g, '_')\n  .replace(/[^a-z0-9_-]/g, '')\n  .substring(0, 50); // Limit length\n\n// Create timestamp\nconst now = new Date();\nconst timestamp = now.toISOString().replace(/:/g, '-').split('.')[0];\n\n// Output directory (relative to n8n workspace)\nconst outputDir = '/Users/udayammanagi/Udays-Folder/IK/brd_agent_em/sample_inputs/outputs/engineering_plans';\n\n// Ensure directory exists\nif (!fs.existsSync(outputDir)) {\n  fs.mkdirSync(outputDir, { recursive: true });\n}\n\n// Find existing versions\nconst existingFiles = fs.readdirSync(outputDir)\n  .filter(f => f.startsWith(`engineering_plan_${sanitizedName}_v`));\n\n// Determine version number\nlet version = 1;\nif (existingFiles.length > 0) {\n  const versions = existingFiles.map(f => {\n    const match = f.match(/_v(\\d+)_/);\n    return match ? parseInt(match[1]) : 0;\n  });\n  version = Math.max(...versions) + 1;\n}\n\n// Create filename\nconst filename = `engineering_plan_${sanitizedName}_v${version}_${timestamp}.json`;\nconst filepath = path.join(outputDir, filename);\n\n// Write file\nfs.writeFileSync(filepath, JSON.stringify(planData, null, 2));\n\nreturn {\n  json: {\n    ...planData,\n    file_saved: {\n      success: true,\n      filepath: filepath,\n      filename: filename,\n      version: version,\n      timestamp: timestamp\n    }\n  }\n};"
+      },
+      "id": "save-to-file-001",
+      "name": "Save to File",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1650, 300]
+    },
+    {
+      "parameters": {
         "respondWith": "json",
         "responseBody": "={{JSON.stringify($json, null, 2)}}",
         "options": {
@@ -143,7 +153,7 @@
       "name": "Respond with Engineering Plan",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [1650, 300]
+      "position": [1850, 300]
     },
     {
       "parameters": {
@@ -245,6 +255,17 @@
       ]
     },
     "Save to State": {
+      "main": [
+        [
+          {
+            "node": "Save to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save to File": {
       "main": [
         [
           {
