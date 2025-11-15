@@ -167,13 +167,24 @@
     },
     {
       "parameters": {
-        "jsCode": "const fs = require('fs');\nconst path = require('path');\n\n// Get the schedule data\nconst scheduleData = $input.item.json;\nconst projectName = scheduleData.metadata?.source_plan || 'unknown_project';\n\n// Sanitize project name for filename\nconst sanitizedName = projectName\n  .toLowerCase()\n  .replace(/\\s+/g, '_')\n  .replace(/[^a-z0-9_-]/g, '')\n  .substring(0, 50);\n\n// Create timestamp\nconst now = new Date();\nconst timestamp = now.toISOString().replace(/:/g, '-').split('.')[0];\n\n// Output directory\nconst outputDir = '/Users/udayammanagi/Udays-Folder/IK/brd_agent_em/sample_inputs/outputs/project_schedules';\n\n// Ensure directory exists\nif (!fs.existsSync(outputDir)) {\n  fs.mkdirSync(outputDir, { recursive: true });\n}\n\n// Find existing versions\nconst existingFiles = fs.readdirSync(outputDir)\n  .filter(f => f.startsWith(`project_schedule_${sanitizedName}_v`));\n\n// Determine version number\nlet version = 1;\nif (existingFiles.length > 0) {\n  const versions = existingFiles.map(f => {\n    const match = f.match(/_v(\\d+)_/);\n    return match ? parseInt(match[1]) : 0;\n  });\n  version = Math.max(...versions) + 1;\n}\n\n// Create filename\nconst filename = `project_schedule_${sanitizedName}_v${version}_${timestamp}.json`;\nconst filepath = path.join(outputDir, filename);\n\n// Write file\nfs.writeFileSync(filepath, JSON.stringify(scheduleData, null, 2));\n\nreturn {\n  json: {\n    ...scheduleData,\n    file_saved: {\n      success: true,\n      filepath: filepath,\n      filename: filename,\n      version: version,\n      timestamp: timestamp\n    }\n  }\n};"
+        "jsCode": "// Prepare filename and data for file writing\nconst scheduleData = $input.item.json;\nconst projectName = scheduleData.metadata?.source_plan || 'unknown_project';\nconst timestamp = new Date().toISOString().replace(/:/g, '-').split('.')[0];\n\n// Sanitize project name for filename\nconst sanitizedName = projectName\n  .toLowerCase()\n  .replace(/\\s+/g, '_')\n  .replace(/[^a-z0-9_-]/g, '')\n  .substring(0, 50);\n\n// Create filename with v1 (versioning will be manual for now)\nconst filename = `project_schedule_${sanitizedName}_v1_${timestamp}.json`;\n\n// Convert JSON to binary data for Write Binary File node\nconst jsonString = JSON.stringify(scheduleData, null, 2);\nconst binaryData = Buffer.from(jsonString, 'utf-8');\n\nreturn {\n  json: {\n    ...scheduleData,\n    filename: filename,\n    filepath: `sample_inputs/outputs/project_schedules/${filename}`,\n    file_saved: {\n      success: true,\n      filename: filename,\n      timestamp: timestamp\n    }\n  },\n  binary: {\n    data: {\n      data: binaryData.toString('base64'),\n      mimeType: 'application/json',\n      fileName: filename\n    }\n  }\n};"
       },
-      "id": "save-to-file-002",
-      "name": "Save to File",
+      "id": "prepare-file-data-002",
+      "name": "Prepare File Data",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [2050, 300]
+    },
+    {
+      "parameters": {
+        "fileName": "={{$json.filepath}}",
+        "options": {}
+      },
+      "id": "write-file-002",
+      "name": "Write File to Disk",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [2250, 300]
     },
     {
       "parameters": {
@@ -195,7 +206,7 @@
       "name": "Respond with Schedule",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [2250, 300]
+      "position": [2450, 300]
     },
     {
       "parameters": {
@@ -327,14 +338,25 @@
       "main": [
         [
           {
-            "node": "Save to File",
+            "node": "Prepare File Data",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Save to File": {
+    "Prepare File Data": {
+      "main": [
+        [
+          {
+            "node": "Write File to Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write File to Disk": {
       "main": [
         [
           {
