@@ -261,19 +261,18 @@
             "node": "Save to State",
             "type": "main",
             "index": 0
-          }
-        ]
-      ]
-    },
-    "Save to State": {
-      "main": [
-        [
+          },
           {
             "node": "Prepare File Data",
             "type": "main",
             "index": 0
           }
         ]
+      ]
+    },
+    "Save to State": {
+      "main": [
+        []
       ]
     },
     "Prepare File Data": {

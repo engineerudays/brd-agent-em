@@ -303,11 +303,6 @@
             "node": "Generate Gantt Chart Data",
             "type": "main",
             "index": 0
-          },
-          {
-            "node": "Save Schedule to State",
-            "type": "main",
-            "index": 0
           }
         ]
       ]
@@ -338,11 +333,21 @@
       "main": [
         [
           {
+            "node": "Save Schedule to State",
+            "type": "main",
+            "index": 0
+          },
+          {
             "node": "Prepare File Data",
             "type": "main",
             "index": 0
           }
         ]
+      ]
+    },
+    "Save Schedule to State": {
+      "main": [
+        []
       ]
     },
     "Prepare File Data": {
