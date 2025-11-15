@@ -562,3 +562,11 @@ time curl -X POST http://localhost:5678/webhook/planning-agent/engineering-plan 
 
 **Note:** Replace `localhost:5678` with your actual n8n instance URL and port.
 
+
+==============================================================
+ROUGH TEST CASES
+
+curl -X POST http://localhost:5678/webhook-test/planning-agent/engineering-plan \
+  -H "Content-Type: application/json" \
+  -d @sample_inputs/brds/brd_input_cleaner.json
+
