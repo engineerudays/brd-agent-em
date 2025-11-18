@@ -34,16 +34,35 @@ services:
     networks:
       - n8n-network
 
+  brd-parser:
+    build: ./brd_parser
+    container_name: brd-parser-service
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    env_file:
+      - ./brd_parser/.env
+    networks:
+      - n8n-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
 networks:
   n8n-network:
     driver: bridge
 
 # To use this:
-# 1. Save this file as docker-compose.yml in your project root
+# 1. Create brd_parser/.env with ANTHROPIC_API_KEY (see brd_parser/ENV_TEMPLATE.md)
 # 2. Run: docker-compose up -d
 # 3. Access n8n at: http://localhost:5678
-# 4. Login with: admin / change-this-password (change these!)
-# 5. Import your workflows from n8n_flows/planning_agent/
+# 4. Access BRD Parser API at: http://localhost:8000
+# 5. Login to n8n with: admin / change-this-password (change these!)
+# 6. Import your workflows from n8n_flows/planning_agent/
 
 # Useful commands:
 # - Start: docker-compose up -d

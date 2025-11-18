@@ -4,7 +4,38 @@ This directory contains integration tests for the BRD Multi-Agent System.
 
 ## 📁 Test Scripts
 
-### Project Schedule Generator Test
+### 1. End-to-End Orchestrator Test ⭐ **RECOMMENDED**
+
+**File**: `test_e2e_orchestrator.sh`
+
+Tests the complete pipeline:
+- PDF/JSON BRD → Parser → Engineering Plan → Project Schedule
+
+**Features**:
+- ✅ Comprehensive pre-flight checks
+- ✅ Tests entire pipeline in one go
+- ✅ Validates all stages
+- ✅ Displays execution time and results
+- ✅ Checks generated output files
+
+**Usage** (from project root):
+```bash
+# Test with sample JSON data (built-in)
+tests/integration/test_e2e_orchestrator.sh
+
+# Test with your own JSON BRD
+tests/integration/test_e2e_orchestrator.sh sample_inputs/brds/your_brd.json
+```
+
+**Requirements**:
+- Docker running (n8n + BRD Parser)
+- All workflows imported and activated
+- `jq` installed (`brew install jq`)
+- Anthropic API key configured
+
+---
+
+### 2. Project Schedule Generator Test
 
 **File**: `test_schedule_generator.sh`
 

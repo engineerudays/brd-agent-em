@@ -1,0 +1,459 @@
+{
+  "success": true,
+  "project_schedule": {
+    "project_info": {
+      "project_name": "Unnamed Project",
+      "start_date": "2023-04-01",
+      "estimated_end_date": "2023-07-15",
+      "total_duration_weeks": 16,
+      "total_effort_person_weeks": 64
+    },
+    "phases": [
+      {
+        "phase_id": "P1",
+        "phase_name": "Requirements Gathering and Analysis",
+        "start_date": "2023-04-01",
+        "end_date": "2023-04-22",
+        "duration_weeks": 3,
+        "milestones": [
+          {
+            "milestone_id": "M1",
+            "name": "Requirements Finalized",
+            "target_date": "2023-04-15",
+            "deliverables": [
+              "Requirements Document"
+            ],
+            "dependencies": []
+          }
+        ],
+        "tasks": [
+          {
+            "task_id": "T1",
+            "task_name": "Conduct User Interviews",
+            "description": "Interview key stakeholders to gather requirements",
+            "assigned_to": "Business Analyst",
+            "start_date": "2023-04-01",
+            "end_date": "2023-04-08",
+            "effort_days": 6,
+            "status": "In Progress",
+            "dependencies": [],
+            "priority": "High"
+          },
+          {
+            "task_id": "T2",
+            "task_name": "Analyze User Requirements",
+            "description": "Synthesize interview findings and document requirements",
+            "assigned_to": "Business Analyst",
+            "start_date": "2023-04-09",
+            "end_date": "2023-04-15",
+            "effort_days": 5,
+            "status": "Not Started",
+            "dependencies": [
+              "T1"
+            ],
+            "priority": "High"
+          },
+          {
+            "task_id": "T3",
+            "task_name": "Review and Finalize Requirements",
+            "description": "Review requirements with stakeholders and finalize",
+            "assigned_to": "Project Manager",
+            "start_date": "2023-04-16",
+            "end_date": "2023-04-22",
+            "effort_days": 5,
+            "status": "Not Started",
+            "dependencies": [
+              "T2"
+            ],
+            "priority": "High"
+          }
+        ]
+      },
+      {
+        "phase_id": "P2",
+        "phase_name": "Design and Development",
+        "start_date": "2023-04-23",
+        "end_date": "2023-06-17",
+        "duration_weeks": 8,
+        "milestones": [
+          {
+            "milestone_id": "M2",
+            "name": "Prototype Completed",
+            "target_date": "2023-05-13",
+            "deliverables": [
+              "Prototype"
+            ],
+            "dependencies": [
+              "T4",
+              "T5"
+            ]
+          },
+          {
+            "milestone_id": "M3",
+            "name": "MVP Development Completed",
+            "target_date": "2023-06-10",
+            "deliverables": [
+              "MVP Release"
+            ],
+            "dependencies": [
+              "T6",
+              "T7",
+              "T8"
+            ]
+          }
+        ],
+        "tasks": [
+          {
+            "task_id": "T4",
+            "task_name": "Design System Architecture",
+            "description": "Define the high-level system architecture",
+            "assigned_to": "Software Architect",
+            "start_date": "2023-04-23",
+            "end_date": "2023-05-06",
+            "effort_days": 10,
+            "status": "Not Started",
+            "dependencies": [
+              "T3"
+            ],
+            "priority": "Critical"
+          },
+          {
+            "task_id": "T5",
+            "task_name": "Develop Prototype",
+            "description": "Implement a prototype based on the design",
+            "assigned_to": "Software Engineer",
+            "start_date": "2023-05-07",
+            "end_date": "2023-05-13",
+            "effort_days": 5,
+            "status": "Not Started",
+            "dependencies": [
+              "T4"
+            ],
+            "priority": "High"
+          },
+          {
+            "task_id": "T6",
+            "task_name": "Develop Core Features",
+            "description": "Implement the core functionality of the MVP",
+            "assigned_to": "Software Engineer",
+            "start_date": "2023-05-14",
+            "end_date": "2023-06-03",
+            "effort_days": 15,
+            "status": "Not Started",
+            "dependencies": [
+              "T5"
+            ],
+            "priority": "Critical"
+          },
+          {
+            "task_id": "T7",
+            "task_name": "Implement UI/UX",
+            "description": "Design and implement the user interface",
+            "assigned_to": "UI/UX Designer",
+            "start_date": "2023-05-14",
+            "end_date": "2023-06-03",
+            "effort_days": 15,
+            "status": "Not Started",
+            "dependencies": [
+              "T5"
+            ],
+            "priority": "High"
+          },
+          {
+            "task_id": "T8",
+            "task_name": "Integrate and Test",
+            "description": "Integrate components and perform testing",
+            "assigned_to": "QA Engineer",
+            "start_date": "2023-06-04",
+            "end_date": "2023-06-10",
+            "effort_days": 5,
+            "status": "Not Started",
+            "dependencies": [
+              "T6",
+              "T7"
+            ],
+            "priority": "High"
+          }
+        ]
+      },
+      {
+        "phase_id": "P3",
+        "phase_name": "Deployment and Support",
+        "start_date": "2023-06-18",
+        "end_date": "2023-07-15",
+        "duration_weeks": 4,
+        "milestones": [
+          {
+            "milestone_id": "M4",
+            "name": "MVP Deployed",
+            "target_date": "2023-07-01",
+            "deliverables": [
+              "Deployed Application"
+            ],
+            "dependencies": [
+              "T8"
+            ]
+          },
+          {
+            "milestone_id": "M5",
+            "name": "Project Completed",
+            "target_date": "2023-07-15",
+            "deliverables": [
+              "Project Closeout"
+            ],
+            "dependencies": [
+              "M4"
+            ]
+          }
+        ],
+        "tasks": [
+          {
+            "task_id": "T9",
+            "task_name": "Deploy to Production",
+            "description": "Deploy the MVP to the production environment",
+            "assigned_to": "DevOps Engineer",
+            "start_date": "2023-06-18",
+            "end_date": "2023-07-01",
+            "effort_days": 10,
+            "status": "Not Started",
+            "dependencies": [
+              "T8"
+            ],
+            "priority": "High"
+          },
+          {
+            "task_id": "T10",
+            "task_name": "Provide User Support",
+            "description": "Offer support and address user feedback",
+            "assigned_to": "Customer Support",
+            "start_date": "2023-07-02",
+            "end_date": "2023-07-15",
+            "effort_days": 10,
+            "status": "Not Started",
+            "dependencies": [
+              "T9"
+            ],
+            "priority": "Medium"
+          },
+          {
+            "task_id": "T11",
+            "task_name": "Project Closeout",
+            "description": "Conduct project review and document lessons learned",
+            "assigned_to": "Project Manager",
+            "start_date": "2023-07-08",
+            "end_date": "2023-07-15",
+            "effort_days": 6,
+            "status": "Not Started",
+            "dependencies": [
+              "T10"
+            ],
+            "priority": "Medium"
+          }
+        ]
+      }
+    ],
+    "resource_allocation": [
+      {
+        "role": "Project Manager",
+        "allocation_percentage": 50,
+        "start_date": "2023-04-01",
+        "end_date": "2023-07-15",
+        "key_responsibilities": [
+          "Manage project scope and timeline",
+          "Coordinate cross-functional collaboration"
+        ]
+      },
+      {
+        "role": "Business Analyst",
+        "allocation_percentage": 100,
+        "start_date": "2023-04-01",
+        "end_date": "2023-04-22",
+        "key_responsibilities": [
+          "Gather and analyze user requirements"
+        ]
+      },
+      {
+        "role": "Software Architect",
+        "allocation_percentage": 80,
+        "start_date": "2023-04-23",
+        "end_date": "2023-05-06",
+        "key_responsibilities": [
+          "Design system architecture"
+        ]
+      },
+      {
+        "role": "Software Engineer",
+        "allocation_percentage": 100,
+        "start_date": "2023-05-07",
+        "end_date": "2023-06-10",
+        "key_responsibilities": [
+          "Implement core features and prototype"
+        ]
+      },
+      {
+        "role": "UI/UX Designer",
+        "allocation_percentage": 100,
+        "start_date": "2023-05-14",
+        "end_date": "2023-06-03",
+        "key_responsibilities": [
+          "Design and implement user interface"
+        ]
+      },
+      {
+        "role": "QA Engineer",
+        "allocation_percentage": 100,
+        "start_date": "2023-06-04",
+        "end_date": "2023-06-10",
+        "key_responsibilities": [
+          "Perform integration testing"
+        ]
+      },
+      {
+        "role": "DevOps Engineer",
+        "allocation_percentage": 80,
+        "start_date": "2023-06-18",
+        "end_date": "2023-07-01",
+        "key_responsibilities": [
+          "Deploy application to production"
+        ]
+      },
+      {
+        "role": "Customer Support",
+        "allocation_percentage": 50,
+        "start_date": "2023-07-02",
+        "end_date": "2023-07-15",
+        "key_responsibilities": [
+          "Provide user support and address feedback"
+        ]
+      }
+    ],
+    "critical_path": [
+      {
+        "task_id": "T3",
+        "task_name": "Review and Finalize Requirements",
+        "duration_days": 5,
+        "slack_days": 0
+      },
+      {
+        "task_id": "T4",
+        "task_name": "Design System Architecture",
+        "duration_days": 10,
+        "slack_days": 0
+      },
+      {
+        "task_id": "T6",
+        "task_name": "Develop Core Features",
+        "duration_days": 15,
+        "slack_days": 0
+      },
+      {
+        "task_id": "T8",
+        "task_name": "Integrate and Test",
+        "duration_days": 5,
+        "slack_days": 0
+      },
+      {
+        "task_id": "T9",
+        "task_name": "Deploy to Production",
+        "duration_days": 10,
+        "slack_days": 0
+      }
+    ],
+    "risk_timeline": [
+      {
+        "risk_id": "R1",
+        "description": "Delay in user requirements gathering",
+        "impact_on_schedule": "2-week delay in project timeline",
+        "contingency_buffer_days": 10
+      },
+      {
+        "risk_id": "R2",
+        "description": "Technical complexity in system architecture design",
+        "impact_on_schedule": "1-week delay in prototype development",
+        "contingency_buffer_days": 5
+      },
+      {
+        "risk_id": "R3",
+        "description": "Unforeseen integration issues",
+        "impact_on_schedule": "1-week delay in MVP deployment",
+        "contingency_buffer_days": 7
+      }
+    ],
+    "key_deliverables": [
+      {
+        "deliverable_name": "Requirements Document",
+        "due_date": "2023-04-15",
+        "responsible_team": "Business Analyst",
+        "dependencies": []
+      },
+      {
+        "deliverable_name": "Prototype",
+        "due_date": "2023-05-13",
+        "responsible_team": "Software Engineer",
+        "dependencies": [
+          "T4",
+          "T5"
+        ]
+      },
+      {
+        "deliverable_name": "MVP Release",
+        "due_date": "2023-06-10",
+        "responsible_team": "Software Engineer, UI/UX Designer, QA Engineer",
+        "dependencies": [
+          "T6",
+          "T7",
+          "T8"
+        ]
+      },
+      {
+        "deliverable_name": "Deployed Application",
+        "due_date": "2023-07-01",
+        "responsible_team": "DevOps Engineer",
+        "dependencies": [
+          "T9"
+        ]
+      },
+      {
+        "deliverable_name": "Project Closeout",
+        "due_date": "2023-07-15",
+        "responsible_team": "Project Manager",
+        "dependencies": [
+          "T10",
+          "T11"
+        ]
+      }
+    ],
+    "assumptions": [
+      "The project stakeholders will be available for requirements gathering and review sessions",
+      "The engineering team has the necessary skills and expertise to complete the project tasks",
+      "The development environment and infrastructure will be set up and ready for use"
+    ],
+    "constraints": [
+      "The project must be completed within the 16-week timeline",
+      "The total project effort should not exceed 64 person-weeks",
+      "The project budget is limited and cannot be exceeded"
+    ]
+  },
+  "summary": {
+    "total_phases": 3,
+    "total_tasks": 11,
+    "total_milestones": 5,
+    "generated_at": "2025-11-15T17:26:17.750Z"
+  },
+  "visualization": {
+    "gantt_chart": {
+      "latest_gantt_data": "{\"chart_type\":\"gantt\",\"project_name\":\"Unnamed Project\",\"start_date\":\"2023-04-01\",\"end_date\":\"2023-07-15\",\"tasks\":[{\"id\":\"phase-0\",\"name\":\"Requirements Gathering and Analysis\",\"start\":\"2023-04-01\",\"end\":\"2023-04-22\",\"type\":\"phase\",\"progress\":0,\"dependencies\":[]},{\"id\":\"T1\",\"name\":\"Conduct User Interviews\",\"start\":\"2023-04-01\",\"end\":\"2023-04-08\",\"type\":\"task\",\"progress\":50,\"dependencies\":[],\"assigned_to\":\"Business Analyst\",\"priority\":\"High\",\"parent\":\"phase-0\"},{\"id\":\"T2\",\"name\":\"Analyze User Requirements\",\"start\":\"2023-04-09\",\"end\":\"2023-04-15\",\"type\":\"task\",\"progress\":0,\"dependencies\":[\"T1\"],\"assigned_to\":\"Business Analyst\",\"priority\":\"High\",\"parent\":\"phase-0\"},{\"id\":\"T3\",\"name\":\"Review and Finalize Requirements\",\"start\":\"2023-04-16\",\"end\":\"2023-04-22\",\"type\":\"task\",\"progress\":0,\"dependencies\":[\"T2\"],\"assigned_to\":\"Project Manager\",\"priority\":\"High\",\"parent\":\"phase-0\"},{\"id\":\"phase-1\",\"name\":\"Design and Development\",\"start\":\"2023-04-23\",\"end\":\"2023-06-17\",\"type\":\"phase\",\"progress\":0,\"dependencies\":[]},{\"id\":\"T4\",\"name\":\"Design System Architecture\",\"start\":\"2023-04-23\",\"end\":\"2023-05-06\",\"type\":\"task\",\"progress\":0,\"dependencies\":[\"T3\"],\"assigned_to\":\"Software Architect\",\"priority\":\"Critical\",\"parent\":\"phase-1\"},{\"id\":\"T5\",\"name\":\"Develop Prototype\",\"start\":\"2023-05-07\",\"end\":\"2023-05-13\",\"type\":\"task\",\"progress\":0,\"dependencies\":[\"T4\"],\"assigned_to\":\"Software Engineer\",\"priority\":\"High\",\"parent\":\"phase-1\"},{\"id\":\"T6\",\"name\":\"Develop Core Features\",\"start\":\"2023-05-14\",\"end\":\"2023-06-03\",\"type\":\"task\",\"progress\":0,\"dependencies\":[\"T5\"],\"assigned_to\":\"Software Engineer\",\"priority\":\"Critical\",\"parent\":\"phase-1\"},{\"id\":\"T7\",\"name\":\"Implement UI/UX\",\"start\":\"2023-05-14\",\"end\":\"2023-06-03\",\"type\":\"task\",\"progress\":0,\"dependencies\":[\"T5\"],\"assigned_to\":\"UI/UX Designer\",\"priority\":\"High\",\"parent\":\"phase-1\"},{\"id\":\"T8\",\"name\":\"Integrate and Test\",\"start\":\"2023-06-04\",\"end\":\"2023-06-10\",\"type\":\"task\",\"progress\":0,\"dependencies\":[\"T6\",\"T7\"],\"assigned_to\":\"QA Engineer\",\"priority\":\"High\",\"parent\":\"phase-1\"},{\"id\":\"phase-2\",\"name\":\"Deployment and Support\",\"start\":\"2023-06-18\",\"end\":\"2023-07-15\",\"type\":\"phase\",\"progress\":0,\"dependencies\":[]},{\"id\":\"T9\",\"name\":\"Deploy to Production\",\"start\":\"2023-06-18\",\"end\":\"2023-07-01\",\"type\":\"task\",\"progress\":0,\"dependencies\":[\"T8\"],\"assigned_to\":\"DevOps Engineer\",\"priority\":\"High\",\"parent\":\"phase-2\"},{\"id\":\"T10\",\"name\":\"Provide User Support\",\"start\":\"2023-07-02\",\"end\":\"2023-07-15\",\"type\":\"task\",\"progress\":0,\"dependencies\":[\"T9\"],\"assigned_to\":\"Customer Support\",\"priority\":\"Medium\",\"parent\":\"phase-2\"},{\"id\":\"T11\",\"name\":\"Project Closeout\",\"start\":\"2023-07-08\",\"end\":\"2023-07-15\",\"type\":\"task\",\"progress\":0,\"dependencies\":[\"T10\"],\"assigned_to\":\"Project Manager\",\"priority\":\"Medium\",\"parent\":\"phase-2\"}],\"generated_at\":\"2025-11-15T17:26:17.776Z\"}"
+    }
+  },
+  "metadata": {
+    "generated_by": "Planning Agent - Project Schedule Generator",
+    "timestamp": "2025-11-15T17:26:17.750Z",
+    "source_plan": "Unnamed Project",
+    "version": "1.0",
+    "ai_model": "Claude 3 Haiku",
+    "tokens_used": {
+      "input": 790,
+      "output": 3498
+    }
+  }
+}

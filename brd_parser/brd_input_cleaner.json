@@ -1,0 +1,208 @@
+{
+  "name": "BRD Input Cleaner",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "brd-parser/upload",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-brd-upload-001",
+      "name": "Webhook - Receive BRD",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "brd-parser-upload"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.body.pdf_file}}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "check-input-type-001",
+      "name": "Check Input Type",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare file for parser service\nconst inputData = $input.item.json.body;\n\nreturn {\n  json: {\n    filename: inputData.filename || 'uploaded.pdf',\n    pdf_base64: inputData.pdf_file,\n    timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "id": "prepare-pdf-upload-001",
+      "name": "Prepare PDF Upload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 200]
+    },
+    {
+      "parameters": {
+        "url": "http://brd-parser:8000/parse/pdf",
+        "authentication": "none",
+        "requestMethod": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "file",
+              "value": "={{$json.pdf_base64}}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "call-parser-service-001",
+      "name": "Call BRD Parser Service",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [850, 200]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.status}}",
+              "value2": "success"
+            }
+          ]
+        }
+      },
+      "id": "validate-parse-response-001",
+      "name": "Validate Parse Response",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1050, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract and format parsed BRD data\nconst response = $input.item.json;\n\nif (response.status !== 'success') {\n  throw new Error('BRD parsing failed: ' + (response.message || 'Unknown error'));\n}\n\nconst brdData = response.data;\n\n// Format for downstream agents\nreturn {\n  json: {\n    parsed_brd: brdData,\n    metadata: {\n      filename: response.metadata?.filename || 'unknown',\n      features_count: brdData.features?.length || 0,\n      text_length: response.metadata?.text_length || 0,\n      parsed_at: new Date().toISOString()\n    },\n    status: 'success'\n  }\n};"
+      },
+      "id": "format-parsed-data-001",
+      "name": "Format Parsed Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1250, 150]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Already JSON input (from orchestrator or direct API call)\nconst inputData = $input.item.json.body;\n\nreturn {\n  json: {\n    parsed_brd: inputData.brd_data || inputData,\n    metadata: {\n      source: 'direct_json',\n      parsed_at: new Date().toISOString()\n    },\n    status: 'success'\n  }\n};"
+      },
+      "id": "handle-json-input-001",
+      "name": "Handle JSON Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Merge both paths (PDF and JSON)\nconst data = $input.item.json;\n\nreturn {\n  json: data\n};"
+      },
+      "id": "merge-paths-001",
+      "name": "Merge Paths",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1450, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{JSON.stringify($json)}}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "id": "respond-success-001",
+      "name": "Respond Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1650, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Handle parsing error\nconst error = $input.item.json;\n\nreturn {\n  json: {\n    status: 'error',\n    message: 'BRD parsing failed',\n    error: error.message || 'Unknown error',\n    timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "id": "handle-error-001",
+      "name": "Handle Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1250, 350]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{JSON.stringify($json)}}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "respond-error-001",
+      "name": "Respond Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1450, 450]
+    }
+  ],
+  "connections": {
+    "Webhook - Receive BRD": {
+      "main": [[{"node": "Check Input Type", "type": "main", "index": 0}]]
+    },
+    "Check Input Type": {
+      "main": [
+        [{"node": "Prepare PDF Upload", "type": "main", "index": 0}],
+        [{"node": "Handle JSON Input", "type": "main", "index": 0}]
+      ]
+    },
+    "Prepare PDF Upload": {
+      "main": [[{"node": "Call BRD Parser Service", "type": "main", "index": 0}]]
+    },
+    "Call BRD Parser Service": {
+      "main": [[{"node": "Validate Parse Response", "type": "main", "index": 0}]]
+    },
+    "Validate Parse Response": {
+      "main": [
+        [{"node": "Format Parsed Data", "type": "main", "index": 0}],
+        [{"node": "Handle Error", "type": "main", "index": 0}]
+      ]
+    },
+    "Format Parsed Data": {
+      "main": [[{"node": "Merge Paths", "type": "main", "index": 0}]]
+    },
+    "Handle JSON Input": {
+      "main": [[{"node": "Merge Paths", "type": "main", "index": 0}]]
+    },
+    "Merge Paths": {
+      "main": [[{"node": "Respond Success", "type": "main", "index": 0}]]
+    },
+    "Handle Error": {
+      "main": [[{"node": "Respond Error", "type": "main", "index": 0}]]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-11-18T00:00:00.000Z",
+  "versionId": "1"
+}
+
