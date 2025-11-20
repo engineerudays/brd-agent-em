@@ -8,22 +8,28 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "webhook-orchestrator-001",
+      "id": "7b55cbea-30ac-478c-9731-bc3fd40665bc",
       "name": "Webhook - Process BRD",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
-      "position": [250, 400],
+      "position": [
+        -1360,
+        304
+      ],
       "webhookId": "orchestrator-process-brd"
     },
     {
       "parameters": {
         "jsCode": "// Initialize orchestration state\nconst inputData = $input.item.json.body;\n\nreturn {\n  json: {\n    orchestration_id: `orch_${Date.now()}`,\n    input_data: inputData,\n    status: 'started',\n    stages: {\n      brd_parsing: 'pending',\n      engineering_plan: 'pending',\n      project_schedule: 'pending'\n    },\n    results: {},\n    started_at: new Date().toISOString()\n  }\n};"
       },
-      "id": "initialize-orchestration-001",
+      "id": "d0369c0a-c468-47b2-9f4a-473f8a2d8cff",
       "name": "Initialize Orchestration",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [450, 400]
+      "position": [
+        -1168,
+        304
+      ]
     },
     {
       "parameters": {
@@ -36,125 +42,152 @@
           ]
         }
       },
-      "id": "check-needs-parsing-001",
+      "id": "aa6873da-4b7e-413a-a897-bd4ba6a7eda4",
       "name": "Check Needs Parsing",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
-      "position": [650, 400]
+      "position": [
+        -960,
+        304
+      ]
     },
     {
       "parameters": {
+        "method": "POST",
         "url": "http://host.docker.internal:5678/webhook/brd-parser/upload",
-        "authentication": "none",
-        "requestMethod": "POST",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\"body\": {{JSON.stringify($json.input_data)}}}",
+        "jsonBody": "={{ {body: $json.input_data} }}",
         "options": {
           "timeout": 90000
         }
       },
-      "id": "call-brd-parser-001",
+      "id": "ff2b4419-bf86-4d11-9597-4ac6463b0a9d",
       "name": "Call BRD Parser",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [850, 300]
+      "position": [
+        -768,
+        192
+      ]
     },
     {
       "parameters": {
         "jsCode": "// Update state with parsed BRD\nconst state = $input.all()[0].json;\nconst parseResponse = $input.item.json;\n\nif (parseResponse.status !== 'success') {\n  throw new Error('BRD parsing failed: ' + parseResponse.message);\n}\n\nstate.stages.brd_parsing = 'completed';\nstate.results.parsed_brd = parseResponse.parsed_brd;\nstate.results.parse_metadata = parseResponse.metadata;\n\nreturn { json: state };"
       },
-      "id": "update-after-parsing-001",
+      "id": "55a55e48-d559-4259-b229-8221c717f47e",
       "name": "Update After Parsing",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1050, 300]
+      "position": [
+        -560,
+        192
+      ]
     },
     {
       "parameters": {
         "jsCode": "// Skip parsing, use direct JSON input\nconst state = $input.item.json;\n\nstate.stages.brd_parsing = 'skipped';\nstate.results.parsed_brd = state.input_data.brd_data || state.input_data;\n\nreturn { json: state };"
       },
-      "id": "skip-parsing-001",
+      "id": "0dc511c4-727c-4b8b-8440-8ced31e18395",
       "name": "Skip Parsing",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [850, 500]
+      "position": [
+        -768,
+        400
+      ]
     },
     {
       "parameters": {
         "jsCode": "// Merge both paths\nreturn { json: $input.item.json };"
       },
-      "id": "merge-after-parsing-001",
+      "id": "ed6859e9-ae35-499f-9af2-0d1992bbd31a",
       "name": "Merge After Parsing",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1250, 400]
+      "position": [
+        -368,
+        304
+      ]
     },
     {
       "parameters": {
+        "method": "POST",
         "url": "http://host.docker.internal:5678/webhook/planning-agent/engineering-plan",
-        "authentication": "none",
-        "requestMethod": "POST",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{JSON.stringify($json.results.parsed_brd)}}",
+        "jsonBody": "={{ $json.results.parsed_brd }}",
         "options": {
           "timeout": 120000
         }
       },
-      "id": "generate-engineering-plan-001",
+      "id": "df3fde34-3dfc-40d9-a016-9afc152bbb71",
       "name": "Generate Engineering Plan",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [1450, 400]
+      "position": [
+        -160,
+        304
+      ]
     },
     {
       "parameters": {
-        "jsCode": "// Update state with engineering plan\nconst state = $input.all()[0].json;\nconst planResponse = $input.item.json;\n\nstate.stages.engineering_plan = 'completed';\nstate.results.engineering_plan = planResponse;\n\nreturn { json: state };"
+        "jsCode": "// Extract the engineering plan from the previous response\nconst planResponse = $input.item.json;\n\n// The Engineering Plan Generator returns: { engineering_plan: {...}, metadata: {...}, filename: ... }\n// Extract just the engineering_plan object\nconst engineeringPlan = planResponse.engineering_plan;\n\n// DON'T wrap in 'body' - the webhook will do that automatically!\n// We send: {engineering_plan: {...}}\n// Webhook receives: {body: {engineering_plan: {...}}}\nreturn { \n  json: {\n    engineering_plan: engineeringPlan\n  }\n};"
       },
-      "id": "update-after-plan-001",
+      "id": "b173c8f4-8be7-42f5-9437-f3d4b2f56633",
       "name": "Update After Plan",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1650, 400]
+      "position": [
+        48,
+        304
+      ]
     },
     {
       "parameters": {
+        "method": "POST",
         "url": "http://host.docker.internal:5678/webhook/planning-agent/project-schedule",
-        "authentication": "none",
-        "requestMethod": "POST",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{JSON.stringify({engineering_plan: $json.results.engineering_plan})}}",
+        "jsonBody": "={{ $json }}",
         "options": {
           "timeout": 120000
         }
       },
-      "id": "generate-project-schedule-001",
+      "id": "55fc2ae9-7c0c-4884-8da6-ef74baa1e38c",
       "name": "Generate Project Schedule",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [1850, 400]
+      "position": [
+        240,
+        304
+      ]
     },
     {
       "parameters": {
-        "jsCode": "// Finalize orchestration\nconst state = $input.all()[0].json;\nconst scheduleResponse = $input.item.json;\n\nstate.stages.project_schedule = 'completed';\nstate.results.project_schedule = scheduleResponse;\nstate.status = 'completed';\nstate.completed_at = new Date().toISOString();\n\n// Calculate duration\nconst startTime = new Date(state.started_at);\nconst endTime = new Date(state.completed_at);\nstate.duration_seconds = Math.round((endTime - startTime) / 1000);\n\nreturn { json: state };"
+        "jsCode": "// Project schedule generated successfully  \n// Files are already saved by the child workflow\nconst scheduleResponse = $input.item.json;\n\nreturn { \n  json: {\n    stage: \"project_schedule\",\n    status: \"completed\",\n    response: scheduleResponse\n  }\n};"
       },
-      "id": "finalize-orchestration-001",
+      "id": "1b1bc473-249c-43fd-a9e7-3963a164aed6",
       "name": "Finalize Orchestration",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2050, 400]
+      "position": [
+        448,
+        304
+      ]
     },
     {
       "parameters": {
-        "jsCode": "// Prepare final response\nconst state = $input.item.json;\n\nreturn {\n  json: {\n    orchestration_id: state.orchestration_id,\n    status: 'success',\n    message: 'BRD processed successfully through entire pipeline',\n    stages: state.stages,\n    results: {\n      parsed_brd: state.results.parsed_brd,\n      engineering_plan: state.results.engineering_plan,\n      project_schedule: state.results.project_schedule\n    },\n    metadata: {\n      started_at: state.started_at,\n      completed_at: state.completed_at,\n      duration_seconds: state.duration_seconds,\n      features_count: state.results.parsed_brd?.features?.length || 0\n    }\n  }\n};"
+        "jsCode": "// Return simple success response\n// Actual files are already saved by child workflows\nreturn {\n  json: {\n    status: \"success\",\n    message: \"BRD processed successfully through entire pipeline\",\n    stages_completed: [\n      \"brd_parsing\",\n      \"engineering_plan\", \n      \"project_schedule\"\n    ],\n    timestamp: new Date().toISOString(),\n    note: \"Generated files saved to sample_inputs/outputs/\"\n  }\n};"
       },
-      "id": "prepare-response-001",
+      "id": "5dc96c5f-83a7-4d5c-9301-d402d5d98796",
       "name": "Prepare Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2250, 400]
+      "position": [
+        640,
+        304
+      ]
     },
     {
       "parameters": {
@@ -172,64 +205,166 @@
           }
         }
       },
-      "id": "respond-success-001",
+      "id": "ee20c933-073d-4ed9-80e6-9161b5599d19",
       "name": "Respond Success",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [2450, 400]
+      "position": [
+        848,
+        304
+      ]
     }
   ],
+  "pinData": {},
   "connections": {
     "Webhook - Process BRD": {
-      "main": [[{"node": "Initialize Orchestration", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Initialize Orchestration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Initialize Orchestration": {
-      "main": [[{"node": "Check Needs Parsing", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Check Needs Parsing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Check Needs Parsing": {
       "main": [
-        [{"node": "Call BRD Parser", "type": "main", "index": 0}],
-        [{"node": "Skip Parsing", "type": "main", "index": 0}]
+        [
+          {
+            "node": "Call BRD Parser",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Skip Parsing",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Call BRD Parser": {
-      "main": [[{"node": "Update After Parsing", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Update After Parsing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Update After Parsing": {
-      "main": [[{"node": "Merge After Parsing", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Merge After Parsing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Skip Parsing": {
-      "main": [[{"node": "Merge After Parsing", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Merge After Parsing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Merge After Parsing": {
-      "main": [[{"node": "Generate Engineering Plan", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Generate Engineering Plan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Generate Engineering Plan": {
-      "main": [[{"node": "Update After Plan", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Update After Plan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Update After Plan": {
-      "main": [[{"node": "Generate Project Schedule", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Generate Project Schedule",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Generate Project Schedule": {
-      "main": [[{"node": "Finalize Orchestration", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Finalize Orchestration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Finalize Orchestration": {
-      "main": [[{"node": "Prepare Response", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Prepare Response": {
-      "main": [[{"node": "Respond Success", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Respond Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "pinData": {},
+  "active": true,
   "settings": {
-    "executionOrder": "v1",
-    "saveManualExecutions": true,
-    "callerPolicy": "workflowsFromSameOwner"
+    "executionOrder": "v1"
   },
-  "staticData": null,
-  "tags": [],
-  "triggerCount": 0,
-  "updatedAt": "2025-11-18T00:00:00.000Z",
-  "versionId": "1"
+  "versionId": "4e5d2245-11f9-4fa5-9508-2ff82e19bdfe",
+  "meta": {
+    "instanceId": "6e85bdb95b148c559415f867413589fd8971105eae6855a70d1f7ee470ac592d"
+  },
+  "id": "2m4YM34xV6Ujsf8D",
+  "tags": []
 }
-

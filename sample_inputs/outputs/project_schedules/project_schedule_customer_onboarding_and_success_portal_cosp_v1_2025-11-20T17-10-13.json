@@ -1,0 +1,290 @@
+{
+  "success": true,
+  "project_schedule": {
+    "project_info": {
+      "project_name": "Customer Onboarding and Success Portal (COSP)",
+      "start_date": "2023-04-01",
+      "estimated_end_date": "2024-01-31",
+      "total_duration_weeks": 44,
+      "total_effort_person_weeks": 120
+    },
+    "phases": [
+      {
+        "phase_id": "P1",
+        "phase_name": "MVP",
+        "start_date": "2023-04-01",
+        "end_date": "2023-09-30",
+        "duration_weeks": 26,
+        "milestones": [
+          {
+            "milestone_id": "M1",
+            "name": "Functional COSP Web Application",
+            "target_date": "2023-07-31",
+            "deliverables": [
+              "Functional COSP web application",
+              "Deployment and infrastructure setup",
+              "Integration with identity provider and knowledge base"
+            ],
+            "dependencies": []
+          }
+        ],
+        "tasks": [
+          {
+            "task_id": "T1",
+            "task_name": "Implement Single Sign-On (SSO)",
+            "description": "Allow customers to securely log in using their main SaaS product credentials",
+            "assigned_to": "Front-end Developer",
+            "start_date": "2023-04-01",
+            "end_date": "2023-04-14",
+            "effort_days": 10,
+            "status": "Not Started",
+            "dependencies": [
+              "Identity Management System Integration"
+            ],
+            "priority": "Critical"
+          },
+          {
+            "task_id": "T2",
+            "task_name": "Develop Personalized Onboarding Checklists",
+            "description": "Display a personalized onboarding checklist based on the customer's subscription level",
+            "assigned_to": "Back-end Developer",
+            "start_date": "2023-04-15",
+            "end_date": "2023-05-12",
+            "effort_days": 20,
+            "status": "Not Started",
+            "dependencies": [
+              "Customer Subscription Data Integration",
+              "Onboarding Workflow Configuration"
+            ],
+            "priority": "Critical"
+          },
+          {
+            "task_id": "T3",
+            "task_name": "Integrate Knowledge Base",
+            "description": "Integrate with the existing knowledge base API to allow seamless content searching and viewing",
+            "assigned_to": "Back-end Developer",
+            "start_date": "2023-05-13",
+            "end_date": "2023-06-02",
+            "effort_days": 15,
+            "status": "Not Started",
+            "dependencies": [
+              "Knowledge Base API Integration"
+            ],
+            "priority": "High"
+          }
+        ]
+      },
+      {
+        "phase_id": "P2",
+        "phase_name": "Feature Expansion",
+        "start_date": "2023-10-01",
+        "end_date": "2024-01-31",
+        "duration_weeks": 18,
+        "milestones": [
+          {
+            "milestone_id": "M2",
+            "name": "Enhanced COSP with Adoption Metrics and CSM Integration",
+            "target_date": "2024-01-15",
+            "deliverables": [
+              "Enhanced COSP with adoption metrics and CSM integration",
+              "Performance and scalability optimizations"
+            ],
+            "dependencies": []
+          }
+        ],
+        "tasks": [
+          {
+            "task_id": "T4",
+            "task_name": "Implement Adoption Metrics Dashboard",
+            "description": "Display a dashboard showing the customer's adoption metrics (e.g., daily active users, feature usage count)",
+            "assigned_to": "Front-end Developer",
+            "start_date": "2023-10-01",
+            "end_date": "2023-11-11",
+            "effort_days": 30,
+            "status": "Not Started",
+            "dependencies": [
+              "Product Usage Data Integration",
+              "Data Visualization Components"
+            ],
+            "priority": "High"
+          },
+          {
+            "task_id": "T5",
+            "task_name": "Implement Contact CSM Integration",
+            "description": "Provide a 'Contact CSM' button that pre-populates an email or a Zendesk ticket with customer details",
+            "assigned_to": "Back-end Developer",
+            "start_date": "2023-11-12",
+            "end_date": "2023-11-25",
+            "effort_days": 10,
+            "status": "Not Started",
+            "dependencies": [
+              "CRM and Ticketing System Integration"
+            ],
+            "priority": "Medium"
+          }
+        ]
+      }
+    ],
+    "resource_allocation": [
+      {
+        "role": "Project Manager",
+        "allocation_percentage": 100,
+        "start_date": "2023-04-01",
+        "end_date": "2024-01-31",
+        "key_responsibilities": [
+          "Manage project scope, timeline, and resources",
+          "Coordinate cross-functional collaboration",
+          "Monitor and report on project progress"
+        ]
+      },
+      {
+        "role": "Technical Architect",
+        "allocation_percentage": 80,
+        "start_date": "2023-04-01",
+        "end_date": "2024-01-31",
+        "key_responsibilities": [
+          "Design the overall technical architecture",
+          "Provide technical guidance and oversight",
+          "Ensure scalability and performance"
+        ]
+      },
+      {
+        "role": "Front-end Developer (React.js)",
+        "allocation_percentage": 100,
+        "start_date": "2023-04-01",
+        "end_date": "2024-01-31",
+        "key_responsibilities": [
+          "Develop the user interface and user experience",
+          "Implement responsive and accessible design",
+          "Integrate with backend services"
+        ]
+      },
+      {
+        "role": "Back-end Developers (Node.js, Python)",
+        "allocation_percentage": 100,
+        "start_date": "2023-04-01",
+        "end_date": "2024-01-31",
+        "key_responsibilities": [
+          "Develop the backend services and APIs",
+          "Integrate with third-party systems",
+          "Ensure data integrity and security"
+        ]
+      },
+      {
+        "role": "DevOps Engineer",
+        "allocation_percentage": 50,
+        "start_date": "2023-04-01",
+        "end_date": "2024-01-31",
+        "key_responsibilities": [
+          "Set up and maintain the development and production environments",
+          "Implement CI/CD pipelines",
+          "Ensure scalability and reliability of the infrastructure"
+        ]
+      },
+      {
+        "role": "QA Engineer",
+        "allocation_percentage": 80,
+        "start_date": "2023-04-15",
+        "end_date": "2024-01-31",
+        "key_responsibilities": [
+          "Develop and execute test plans",
+          "Identify and report bugs",
+          "Ensure quality and reliability of the application"
+        ]
+      },
+      {
+        "role": "UX Designer",
+        "allocation_percentage": 50,
+        "start_date": "2023-04-01",
+        "end_date": "2023-11-30",
+        "key_responsibilities": [
+          "Design the user interface and user experience",
+          "Conduct user research and usability testing",
+          "Collaborate with the development team"
+        ]
+      }
+    ],
+    "critical_path": [
+      {
+        "task_id": "T2",
+        "task_name": "Develop Personalized Onboarding Checklists",
+        "duration_days": 20,
+        "slack_days": 0
+      },
+      {
+        "task_id": "T4",
+        "task_name": "Implement Adoption Metrics Dashboard",
+        "duration_days": 30,
+        "slack_days": 0
+      }
+    ],
+    "risk_timeline": [
+      {
+        "risk_id": "R-01",
+        "description": "Delays in third-party API integrations (CRM, Knowledge Base, etc.)",
+        "impact_on_schedule": "2 weeks",
+        "contingency_buffer_days": 10
+      },
+      {
+        "risk_id": "R-02",
+        "description": "Complexity of the personalized onboarding checklist feature",
+        "impact_on_schedule": "3 weeks",
+        "contingency_buffer_days": 15
+      },
+      {
+        "risk_id": "R-03",
+        "description": "Potential performance and scalability issues",
+        "impact_on_schedule": "1 week",
+        "contingency_buffer_days": 5
+      }
+    ],
+    "key_deliverables": [
+      {
+        "deliverable_name": "Functional COSP Web Application",
+        "due_date": "2023-07-31",
+        "responsible_team": "Development Team",
+        "dependencies": []
+      },
+      {
+        "deliverable_name": "Enhanced COSP with Adoption Metrics and CSM Integration",
+        "due_date": "2024-01-15",
+        "responsible_team": "Development Team",
+        "dependencies": [
+          "Adoption Metrics Dashboard",
+          "Contact CSM Integration"
+        ]
+      }
+    ],
+    "assumptions": [
+      "Third-party API integrations will be completed as planned",
+      "The development team has the necessary skills and experience to implement the required features",
+      "The infrastructure and tooling will be set up and ready for the project start"
+    ],
+    "constraints": [
+      "Limited budget and resources available for the project",
+      "Tight timeline for the MVP release"
+    ]
+  },
+  "summary": {
+    "total_phases": 2,
+    "total_tasks": 5,
+    "total_milestones": 2,
+    "generated_at": "2025-11-20T17:10:13.874Z"
+  },
+  "visualization": {
+    "gantt_chart": {
+      "latest_gantt_data": "{\"chart_type\":\"gantt\",\"project_name\":\"Customer Onboarding and Success Portal (COSP)\",\"start_date\":\"2023-04-01\",\"end_date\":\"2024-01-31\",\"tasks\":[{\"id\":\"phase-0\",\"name\":\"MVP\",\"start\":\"2023-04-01\",\"end\":\"2023-09-30\",\"type\":\"phase\",\"progress\":0,\"dependencies\":[]},{\"id\":\"T1\",\"name\":\"Implement Single Sign-On (SSO)\",\"start\":\"2023-04-01\",\"end\":\"2023-04-14\",\"type\":\"task\",\"progress\":0,\"dependencies\":[\"Identity Management System Integration\"],\"assigned_to\":\"Front-end Developer\",\"priority\":\"Critical\",\"parent\":\"phase-0\"},{\"id\":\"T2\",\"name\":\"Develop Personalized Onboarding Checklists\",\"start\":\"2023-04-15\",\"end\":\"2023-05-12\",\"type\":\"task\",\"progress\":0,\"dependencies\":[\"Customer Subscription Data Integration\",\"Onboarding Workflow Configuration\"],\"assigned_to\":\"Back-end Developer\",\"priority\":\"Critical\",\"parent\":\"phase-0\"},{\"id\":\"T3\",\"name\":\"Integrate Knowledge Base\",\"start\":\"2023-05-13\",\"end\":\"2023-06-02\",\"type\":\"task\",\"progress\":0,\"dependencies\":[\"Knowledge Base API Integration\"],\"assigned_to\":\"Back-end Developer\",\"priority\":\"High\",\"parent\":\"phase-0\"},{\"id\":\"phase-1\",\"name\":\"Feature Expansion\",\"start\":\"2023-10-01\",\"end\":\"2024-01-31\",\"type\":\"phase\",\"progress\":0,\"dependencies\":[]},{\"id\":\"T4\",\"name\":\"Implement Adoption Metrics Dashboard\",\"start\":\"2023-10-01\",\"end\":\"2023-11-11\",\"type\":\"task\",\"progress\":0,\"dependencies\":[\"Product Usage Data Integration\",\"Data Visualization Components\"],\"assigned_to\":\"Front-end Developer\",\"priority\":\"High\",\"parent\":\"phase-1\"},{\"id\":\"T5\",\"name\":\"Implement Contact CSM Integration\",\"start\":\"2023-11-12\",\"end\":\"2023-11-25\",\"type\":\"task\",\"progress\":0,\"dependencies\":[\"CRM and Ticketing System Integration\"],\"assigned_to\":\"Back-end Developer\",\"priority\":\"Medium\",\"parent\":\"phase-1\"}],\"generated_at\":\"2025-11-20T17:10:13.886Z\"}"
+    }
+  },
+  "metadata": {
+    "generated_by": "Planning Agent - Project Schedule Generator",
+    "timestamp": "2025-11-20T17:10:13.874Z",
+    "source_plan": "Customer Onboarding and Success Portal (COSP)",
+    "version": "1.0",
+    "ai_model": "Claude 3 Haiku",
+    "tokens_used": {
+      "input": 2019,
+      "output": 2408
+    }
+  }
+}
