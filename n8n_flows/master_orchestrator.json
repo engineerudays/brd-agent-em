@@ -177,30 +177,6 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
       "position": [2450, 400]
-    },
-    {
-      "parameters": {
-        "jsCode": "// Handle error in orchestration\nconst errorData = $input.item.json;\nconst error = errorData.error || {};\n\nreturn {\n  json: {\n    status: 'error',\n    message: 'Orchestration failed',\n    error: {\n      stage: error.stage || 'unknown',\n      message: error.message || 'An error occurred',\n      details: error.details || {}\n    },\n    timestamp: new Date().toISOString()\n  }\n};"
-      },
-      "id": "handle-error-001",
-      "name": "Handle Error",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [2050, 600]
-    },
-    {
-      "parameters": {
-        "respondWith": "json",
-        "responseBody": "={{JSON.stringify($json, null, 2)}}",
-        "options": {
-          "responseCode": 500
-        }
-      },
-      "id": "respond-error-001",
-      "name": "Respond Error",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1,
-      "position": [2250, 600]
     }
   ],
   "connections": {
@@ -248,8 +224,7 @@
   "settings": {
     "executionOrder": "v1",
     "saveManualExecutions": true,
-    "callerPolicy": "workflowsFromSameOwner",
-    "errorWorkflow": "Handle Error"
+    "callerPolicy": "workflowsFromSameOwner"
   },
   "staticData": null,
   "tags": [],
