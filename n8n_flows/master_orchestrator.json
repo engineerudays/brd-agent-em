@@ -44,7 +44,7 @@
     },
     {
       "parameters": {
-        "url": "http://host.docker.internal:5678/webhook-test/brd-parser/upload",
+        "url": "http://host.docker.internal:5678/webhook/brd-parser/upload",
         "authentication": "none",
         "requestMethod": "POST",
         "sendBody": true,
@@ -92,7 +92,7 @@
     },
     {
       "parameters": {
-        "url": "http://host.docker.internal:5678/webhook-test/planning-agent/engineering-plan",
+        "url": "http://host.docker.internal:5678/webhook/planning-agent/engineering-plan",
         "authentication": "none",
         "requestMethod": "POST",
         "sendBody": true,
@@ -120,7 +120,7 @@
     },
     {
       "parameters": {
-        "url": "http://host.docker.internal:5678/webhook-test/planning-agent/project-schedule",
+        "url": "http://host.docker.internal:5678/webhook/planning-agent/project-schedule",
         "authentication": "none",
         "requestMethod": "POST",
         "sendBody": true,

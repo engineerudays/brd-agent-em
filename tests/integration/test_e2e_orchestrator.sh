@@ -12,7 +12,7 @@ echo ""
 # Configuration
 N8N_URL="http://localhost:5678"
 BRD_PARSER_URL="http://localhost:8000"
-ORCHESTRATOR_URL="$N8N_URL/webhook-test/orchestrator/process-brd"
+ORCHESTRATOR_URL="$N8N_URL/webhook/orchestrator/process-brd"
 
 # Colors for output
 GREEN='\033[0;32m'
