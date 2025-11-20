@@ -202,6 +202,41 @@ RESPONSE_BODY=$(echo "$RESPONSE" | sed '$d')
 echo ""
 
 if [ "$HTTP_CODE" = "200" ]; then
+    # Validate response body is not empty
+    if [ -z "$RESPONSE_BODY" ] || [ "$RESPONSE_BODY" = "{}" ]; then
+        print_error "Orchestration returned HTTP 200 but response body is empty!"
+        print_error "This usually means workflows are not properly activated in n8n."
+        echo ""
+        print_error "❌ END-TO-END TEST FAILED (Empty Response)"
+        echo ""
+        exit 1
+    fi
+    
+    # Validate response has status field
+    RESPONSE_STATUS=$(echo "$RESPONSE_BODY" | jq -r '.status // empty')
+    if [ -z "$RESPONSE_STATUS" ]; then
+        print_error "Orchestration returned HTTP 200 but response has no .status field!"
+        echo ""
+        echo "Response received:"
+        echo "$RESPONSE_BODY"
+        echo ""
+        print_error "❌ END-TO-END TEST FAILED (Invalid Response)"
+        echo ""
+        exit 1
+    fi
+    
+    # Validate orchestration succeeded
+    if [ "$RESPONSE_STATUS" != "success" ]; then
+        print_error "Orchestration status: $RESPONSE_STATUS"
+        echo ""
+        echo "Response:"
+        echo "$RESPONSE_BODY" | jq '.'
+        echo ""
+        print_error "❌ END-TO-END TEST FAILED (Orchestration Failed)"
+        echo ""
+        exit 1
+    fi
+    
     print_status "Orchestration completed successfully! (HTTP $HTTP_CODE)"
     print_info "Duration: ${DURATION} seconds"
     echo ""
@@ -211,7 +246,7 @@ if [ "$HTTP_CODE" = "200" ]; then
     echo ""
     
     # Parse and display results
-    echo "$RESPONSE_BODY" | jq '{
+    RESULT_SUMMARY=$(echo "$RESPONSE_BODY" | jq '{
       orchestration_id: .orchestration_id,
       status: .status,
       duration: .metadata.duration_seconds,
@@ -220,7 +255,20 @@ if [ "$HTTP_CODE" = "200" ]; then
       features_count: (.results.parsed_brd.features | length),
       engineering_plan_phases: (.results.engineering_plan.engineering_plan.implementation_phases | length // 0),
       schedule_timeline: .results.project_schedule.project_schedule.project_info.total_duration_weeks
-    }'
+    }')
+    
+    if [ $? -ne 0 ] || [ -z "$RESULT_SUMMARY" ]; then
+        print_error "Failed to parse response results!"
+        echo ""
+        echo "Raw response:"
+        echo "$RESPONSE_BODY"
+        echo ""
+        print_error "❌ END-TO-END TEST FAILED (Parse Error)"
+        echo ""
+        exit 1
+    fi
+    
+    echo "$RESULT_SUMMARY"
     
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
