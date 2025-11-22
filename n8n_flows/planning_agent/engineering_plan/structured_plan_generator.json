@@ -173,18 +173,9 @@
     },
     {
       "parameters": {
-        "respondWith": "json",
-        "responseBody": "={{ $json }}",
+        "respondWith": "allEntries",
         "options": {
-          "responseCode": 200,
-          "responseHeaders": {
-            "entries": [
-              {
-                "name": "Content-Type",
-                "value": "application/json"
-              }
-            ]
-          }
+          "responseCode": 200
         }
       },
       "id": "webhook-response-001",
