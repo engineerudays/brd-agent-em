@@ -24,7 +24,7 @@ def submit_brd_to_orchestrator(brd_data: Dict[str, Any], orchestrator_url: str) 
     try:
         response = requests.post(
             orchestrator_url,
-            json={"body": brd_data},
+            json=brd_data,  # Don't wrap in 'body' - the webhook does this automatically
             headers={"Content-Type": "application/json"},
             timeout=180  # 3 minutes timeout
         )
