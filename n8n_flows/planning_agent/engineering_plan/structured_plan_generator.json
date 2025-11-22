@@ -173,7 +173,7 @@
     },
     {
       "parameters": {
-        "respondWith": "allEntries",
+        "respondWith": "firstEntryJson",
         "options": {
           "responseCode": 200
         }
