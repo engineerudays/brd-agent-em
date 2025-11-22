@@ -10,13 +10,15 @@ An AI-powered multi-agent system that transforms Business Requirements Documents
 
 BRD Agent automates the tedious process of converting business requirements into actionable engineering deliverables:
 
-**Input:** Business Requirements Document (BRD) in JSON format
+**Input:** Business Requirements Document (BRD) in **PDF** or **JSON** format
 
 **Output:**
 - 📋 **Engineering Plan** - Detailed feature breakdown, technical architecture, implementation phases
 - 📅 **Project Schedule** - Timeline, milestones, task assignments, resource allocation
+- 📊 **Interactive Gantt Chart** - Visual project timeline
+- ⚠️ **Risk Analysis** - Identified risks with mitigation strategies
+- 👥 **Resource Requirements** - Team composition and technology stack
 - 🏗️ **Architecture Design** - System diagrams, component specifications (Coming Soon)
-- ⚙️ **Tech Stack Recommendations** - Technology choices with justifications (Coming Soon)
 - 💻 **Proof-of-Concept Code** - Starter implementation (Coming Soon)
 
 ---
@@ -25,20 +27,46 @@ BRD Agent automates the tedious process of converting business requirements into
 
 ### ✅ Currently Implemented
 
+- **🎨 Streamlit UI**: Beautiful, interactive web interface
+- **📄 PDF Upload Support**: Upload BRDs in PDF format with automatic parsing
 - **🔍 BRD Parser**: FastAPI service that extracts structured data from BRDs
-- **📋 Engineering Plan Generator**: Creates detailed engineering specifications
+- **📋 Engineering Plan Generator**: Creates detailed engineering specifications with AI
 - **📅 Project Schedule Generator**: Builds comprehensive project timelines
+- **📊 Interactive Gantt Chart**: Visual timeline with phases and milestones
 - **🎭 Master Orchestrator**: Coordinates all agents in a seamless pipeline
+- **🔄 Auto-Retry Logic**: Automatic retry with exponential backoff (3 attempts)
+- **💬 Toast Notifications**: Real-time user feedback
 - **🧪 Automated Testing**: End-to-end test suite for validation
 - **🐳 Docker Support**: Containerized deployment with Docker Compose
 - **🔄 n8n Workflows**: Visual workflow automation platform
+- **📚 Comprehensive Docs**: User guide, API reference, setup instructions
 
 ### 🚧 Coming Soon
 
 - **Architecture Design Agent**: Generate system architecture diagrams
 - **Tech Stack Agent**: Recommend and justify technology choices
 - **PoC Generator**: Create working proof-of-concept code
-- **Streamlit Frontend**: User-friendly web interface
+- **Session Persistence**: Save/load workspace
+- **Batch Processing**: Process multiple BRDs in queue
+
+---
+
+## 📚 Documentation
+
+Comprehensive guides for different audiences:
+
+| Document | Audience | Description |
+|----------|----------|-------------|
+| **[USER_GUIDE.md](USER_GUIDE.md)** | End Users | Complete usage guide with PDF support, input methods, troubleshooting |
+| **[API_REFERENCE.md](API_REFERENCE.md)** | Developers | API endpoints, schemas, architecture, integration guide |
+| **[SETUP.md](SETUP.md)** | DevOps/Admins | Installation, configuration, deployment instructions |
+| **[README.md](README.md)** | Everyone | Project overview, quick start, features |
+
+**Quick Links:**
+- 🎯 [Getting Started](SETUP.md#quick-start)
+- 📖 [How to Use](USER_GUIDE.md#getting-started)
+- 🔌 [API Reference](API_REFERENCE.md#api-endpoints)
+- 🛠️ [Troubleshooting](USER_GUIDE.md#troubleshooting)
 
 ---
 
@@ -70,9 +98,11 @@ BRD Agent automates the tedious process of converting business requirements into
 
 ### Technology Stack
 
+- **Frontend**: Streamlit (Python)
 - **Backend**: Python FastAPI
 - **Workflow Engine**: n8n (low-code workflow automation)
 - **AI**: Anthropic Claude (Haiku & Sonnet models)
+- **Visualization**: Plotly (Interactive Gantt charts)
 - **Containerization**: Docker & Docker Compose
 - **Testing**: Bash scripts with curl & jq
 
