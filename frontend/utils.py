@@ -10,73 +10,141 @@ from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional
 
 
-def submit_brd_to_orchestrator(brd_data: Dict[str, Any], orchestrator_url: str) -> Dict[str, Any]:
+def submit_brd_to_orchestrator(brd_data: Dict[str, Any], orchestrator_url: str, max_retries: int = 3) -> Dict[str, Any]:
     """
-    Submit BRD to the orchestrator API.
+    Submit BRD to the orchestrator API with retry logic.
     
     Args:
         brd_data: BRD data as dictionary
         orchestrator_url: Orchestrator endpoint URL
+        max_retries: Maximum number of retry attempts (default: 3)
         
     Returns:
         Response from orchestrator
     """
-    try:
-        response = requests.post(
-            orchestrator_url,
-            json=brd_data,  # Don't wrap in 'body' - the webhook does this automatically
-            headers={"Content-Type": "application/json"},
-            timeout=180  # 3 minutes timeout
-        )
-        response.raise_for_status()
-        
-        # Check if response has content
-        if not response.content:
-            return {
-                "success": False,
-                "error": "Empty response from orchestrator. Check if the workflow is activated in n8n.",
-                "status_code": response.status_code,
-                "debug_info": f"URL: {orchestrator_url}"
-            }
-        
-        # Try to parse JSON
+    import time
+    
+    for attempt in range(max_retries):
         try:
-            json_data = response.json()
-            return {
-                "success": True,
-                "data": json_data,
-                "status_code": response.status_code
-            }
-        except json.JSONDecodeError as je:
+            response = requests.post(
+                orchestrator_url,
+                json=brd_data,  # Don't wrap in 'body' - the webhook does this automatically
+                headers={"Content-Type": "application/json"},
+                timeout=180  # 3 minutes timeout
+            )
+            response.raise_for_status()
+            
+            # Check if response has content
+            if not response.content:
+                return {
+                    "success": False,
+                    "error": "Empty response from orchestrator. Check if the workflow is activated in n8n.",
+                    "status_code": response.status_code,
+                    "debug_info": f"URL: {orchestrator_url}",
+                    "attempts": attempt + 1
+                }
+            
+            # Try to parse JSON
+            try:
+                json_data = response.json()
+                return {
+                    "success": True,
+                    "data": json_data,
+                    "status_code": response.status_code,
+                    "attempts": attempt + 1
+                }
+            except json.JSONDecodeError as je:
+                # JSON decode errors are not retryable
+                return {
+                    "success": False,
+                    "error": f"Invalid JSON response: {str(je)}",
+                    "status_code": response.status_code,
+                    "debug_info": f"Response preview: {response.text[:500]}",
+                    "attempts": attempt + 1
+                }
+                
+        except requests.exceptions.Timeout:
+            # Timeout - retry with exponential backoff
+            if attempt < max_retries - 1:
+                wait_time = (2 ** attempt) * 2  # 2s, 4s, 8s
+                time.sleep(wait_time)
+                continue
             return {
                 "success": False,
-                "error": f"Invalid JSON response: {str(je)}",
-                "status_code": response.status_code,
-                "debug_info": f"Response preview: {response.text[:500]}"
+                "error": f"Request timed out after {max_retries} attempts. The orchestrator may be overloaded or slow.",
+                "status_code": 0,
+                "attempts": max_retries
             }
             
-    except requests.exceptions.Timeout:
-        return {
-            "success": False,
-            "error": "Request timed out. The orchestrator may be processing a large BRD.",
-            "status_code": 0
-        }
-    except requests.exceptions.RequestException as e:
-        error_msg = str(e)
-        debug_info = ""
-        
-        if hasattr(e, 'response') and e.response is not None:
-            try:
-                debug_info = f"Response: {e.response.text[:500]}"
-            except:
-                debug_info = "Could not read response text"
-        
-        return {
-            "success": False,
-            "error": error_msg,
-            "status_code": getattr(e.response, 'status_code', 0) if hasattr(e, 'response') else 0,
-            "debug_info": debug_info
-        }
+        except requests.exceptions.ConnectionError as ce:
+            # Connection error - retry with exponential backoff
+            if attempt < max_retries - 1:
+                wait_time = (2 ** attempt) * 2  # 2s, 4s, 8s
+                time.sleep(wait_time)
+                continue
+            return {
+                "success": False,
+                "error": f"Connection failed after {max_retries} attempts: {str(ce)}",
+                "status_code": 0,
+                "attempts": max_retries
+            }
+            
+        except requests.exceptions.HTTPError as he:
+            # HTTP errors (4xx, 5xx)
+            status_code = he.response.status_code if hasattr(he, 'response') else 0
+            
+            # Retry on 5xx server errors, but not 4xx client errors
+            if status_code >= 500 and attempt < max_retries - 1:
+                wait_time = (2 ** attempt) * 2  # 2s, 4s, 8s
+                time.sleep(wait_time)
+                continue
+            
+            error_msg = str(he)
+            debug_info = ""
+            if hasattr(he, 'response') and he.response is not None:
+                try:
+                    debug_info = f"Response: {he.response.text[:500]}"
+                except:
+                    debug_info = "Could not read response text"
+            
+            return {
+                "success": False,
+                "error": error_msg,
+                "status_code": status_code,
+                "debug_info": debug_info,
+                "attempts": attempt + 1
+            }
+            
+        except requests.exceptions.RequestException as e:
+            # Other request errors - retry
+            if attempt < max_retries - 1:
+                wait_time = (2 ** attempt) * 2  # 2s, 4s, 8s
+                time.sleep(wait_time)
+                continue
+            
+            error_msg = str(e)
+            debug_info = ""
+            if hasattr(e, 'response') and e.response is not None:
+                try:
+                    debug_info = f"Response: {e.response.text[:500]}"
+                except:
+                    debug_info = "Could not read response text"
+            
+            return {
+                "success": False,
+                "error": error_msg,
+                "status_code": getattr(e.response, 'status_code', 0) if hasattr(e, 'response') else 0,
+                "debug_info": debug_info,
+                "attempts": max_retries
+            }
+    
+    # Should never reach here, but just in case
+    return {
+        "success": False,
+        "error": "Unexpected error in retry logic",
+        "status_code": 0,
+        "attempts": max_retries
+    }
 
 
 def validate_brd_json(brd_text: str) -> tuple[bool, Optional[Dict], Optional[str]]:

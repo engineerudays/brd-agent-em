@@ -271,10 +271,17 @@ def process_brd(orchestrator_url: str):
         if result['success']:
             st.session_state['result'] = result['data']
             st.session_state['processing_complete'] = True
-            st.success("✅ BRD processed successfully! Check the 'Results' and 'Timeline' tabs.")
+            
+            # Show success message with retry info if applicable
+            success_msg = "✅ BRD processed successfully! Check the 'Results' and 'Timeline' tabs."
+            if result.get('attempts', 1) > 1:
+                success_msg += f" (Completed after {result['attempts']} attempts)"
+            st.success(success_msg)
             # Don't rerun - let Streamlit naturally update the UI
         else:
             st.error(f"❌ Processing failed: {result.get('error', 'Unknown error')}")
+            if result.get('attempts'):
+                st.caption(f"Attempts made: {result['attempts']}")
             if result.get('status_code'):
                 st.caption(f"HTTP Status Code: {result['status_code']}")
             if result.get('debug_info'):
