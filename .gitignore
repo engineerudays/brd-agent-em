@@ -40,3 +40,9 @@ tmp/
 # Cursor IDE
 cursor-logs/
 
+# Generated outputs (keep structure, ignore generated files)
+sample_inputs/outputs/engineering_plans/*.json
+sample_inputs/outputs/project_schedules/*.json
+sample_inputs/outputs/architecture_designs/*.json
+sample_inputs/outputs/tech_stacks/*.json
+

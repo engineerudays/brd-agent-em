@@ -1,100 +1,296 @@
-# brd_agent_em - Agent Workflow Structure
+# 🤖 BRD Agent - Multi-Agent Engineering Manager
 
-This project uses n8n for agent orchestration with a modular workflow-based architecture.
+An AI-powered multi-agent system that transforms Business Requirements Documents (BRDs) into comprehensive engineering artifacts including engineering plans, project schedules, architecture designs, and proof-of-concept code.
 
-## Project Structure
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+---
+
+## 🎯 What Does It Do?
+
+BRD Agent automates the tedious process of converting business requirements into actionable engineering deliverables:
+
+**Input:** Business Requirements Document (BRD) in JSON format
+
+**Output:**
+- 📋 **Engineering Plan** - Detailed feature breakdown, technical architecture, implementation phases
+- 📅 **Project Schedule** - Timeline, milestones, task assignments, resource allocation
+- 🏗️ **Architecture Design** - System diagrams, component specifications (Coming Soon)
+- ⚙️ **Tech Stack Recommendations** - Technology choices with justifications (Coming Soon)
+- 💻 **Proof-of-Concept Code** - Starter implementation (Coming Soon)
+
+---
+
+## ✨ Features
+
+### ✅ Currently Implemented
+
+- **🔍 BRD Parser**: FastAPI service that extracts structured data from BRDs
+- **📋 Engineering Plan Generator**: Creates detailed engineering specifications
+- **📅 Project Schedule Generator**: Builds comprehensive project timelines
+- **🎭 Master Orchestrator**: Coordinates all agents in a seamless pipeline
+- **🧪 Automated Testing**: End-to-end test suite for validation
+- **🐳 Docker Support**: Containerized deployment with Docker Compose
+- **🔄 n8n Workflows**: Visual workflow automation platform
+
+### 🚧 Coming Soon
+
+- **Architecture Design Agent**: Generate system architecture diagrams
+- **Tech Stack Agent**: Recommend and justify technology choices
+- **PoC Generator**: Create working proof-of-concept code
+- **Streamlit Frontend**: User-friendly web interface
+
+---
+
+## 🏗️ Architecture
+
+```
+                    ┌─────────────────────────────────┐
+                    │     Master Orchestrator         │
+                    │      (n8n Workflow)             │
+                    └────────────┬────────────────────┘
+                                 │
+          ┌──────────────────────┼──────────────────────┐
+          │                      │                      │
+          ▼                      ▼                      ▼
+   ┌──────────┐          ┌──────────┐          ┌──────────┐
+   │   BRD    │          │ Planning │          │  Design  │
+   │  Parser  │          │  Agent   │          │  Agent   │
+   │ (FastAPI)│          │  (n8n)   │          │  (n8n)   │
+   └──────────┘          └──────────┘          └──────────┘
+        │                      │                      │
+        │                      ├──────────────┬──────┤
+        │                      │              │      │
+        ▼                      ▼              ▼      ▼
+   ┌─────────┐        ┌─────────────┐  ┌─────────┐ ...
+   │ Parsed  │        │ Engineering │  │ Project │
+   │   BRD   │        │    Plan     │  │Schedule │
+   └─────────┘        └─────────────┘  └─────────┘
+```
+
+### Technology Stack
+
+- **Backend**: Python FastAPI
+- **Workflow Engine**: n8n (low-code workflow automation)
+- **AI**: Anthropic Claude (Haiku & Sonnet models)
+- **Containerization**: Docker & Docker Compose
+- **Testing**: Bash scripts with curl & jq
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Docker & Docker Compose
+- Anthropic API Key
+- 8GB RAM minimum
+
+### Installation (5 minutes)
+
+```bash
+# 1. Clone repository
+git clone https://github.com/engineerudays/brd-agent-em.git
+cd brd-agent-em
+
+# 2. Configure API key
+echo "ANTHROPIC_API_KEY=your_key_here" > brd_parser/.env
+
+# 3. Update volume path in docker-compose.yml
+# (Replace with your local path)
+
+# 4. Start services
+docker-compose up -d
+
+# 5. Import n8n workflows
+# Open http://localhost:5678 and import workflows from n8n_flows/
+
+# 6. Test the system
+./tests/integration/test_e2e_orchestrator.sh sample_inputs/brds/brd_input_cleaner.json
+```
+
+📖 **For detailed setup instructions, see [SETUP.md](SETUP.md)**
+
+---
+
+## 📝 Usage Example
+
+### Input BRD (JSON)
+
+```json
+{
+  "project": {
+    "name": "Customer Onboarding Portal",
+    "description": "A portal to streamline customer onboarding",
+    "objectives": ["Reduce churn", "Improve TTV"]
+  },
+  "features": [
+    {
+      "id": "F001",
+      "name": "Single Sign-On",
+      "priority": "Critical"
+    }
+  ]
+}
+```
+
+### Generated Engineering Plan
+
+```json
+{
+  "engineering_plan": {
+    "project_overview": {...},
+    "feature_breakdown": [
+      {
+        "feature_id": "F-01",
+        "complexity": "Medium",
+        "estimated_effort": "2 weeks",
+        "technical_requirements": [...],
+        "acceptance_criteria": [...]
+      }
+    ],
+    "technical_architecture": {...},
+    "implementation_phases": [...],
+    "risk_analysis": [...],
+    "resource_requirements": {...}
+  }
+}
+```
+
+### Generated Project Schedule
+
+```json
+{
+  "project_schedule": {
+    "project_info": {
+      "total_duration_weeks": 24,
+      "start_date": "2025-01-01"
+    },
+    "phases": [...],
+    "resource_allocation": [...],
+    "critical_path": [...],
+    "key_deliverables": [...]
+  }
+}
+```
+
+---
+
+## 📊 Project Status
+
+| Component | Status | Completion |
+|-----------|--------|------------|
+| BRD Parser | ✅ Complete | 100% |
+| Engineering Plan Generator | ✅ Complete | 100% |
+| Project Schedule Generator | ✅ Complete | 100% |
+| Master Orchestrator | ✅ Complete | 100% |
+| Architecture Design Agent | 🚧 Planned | 0% |
+| Tech Stack Agent | 🚧 Planned | 0% |
+| PoC Generator | 🚧 Planned | 0% |
+| Streamlit Frontend | 🚧 Planned | 0% |
+
+---
+
+## 🗂️ Repository Structure
 
 ```
 brd_agent_em/
-├── n8n_flows/                          # n8n Workflow JSON files (Agent-based structure)
-│   ├── planning_agent/                 # Planning Agent workflows
-│   │   ├── engineering_plan/          # Structured Engineering Plan generator
-│   │   └── project_schedule/          # Project Schedule generator
-│   ├── design_agent/                   # Design Agent workflows
-│   │   ├── architecture/               # High-Level Architecture generator
-│   │   ├── poc/                        # Proof of Concept generator
-│   │   └── tech_stack/                 # Tech Stack Matrix generator
-│   ├── shared_nodes/                   # Shared components (State Management, Error Handling)
-│   ├── exported/                       # Production-ready exported flows
-│   └── templates/                      # Template flows for reuse
-│
-├── brd_parser/                         # BRD (Business Requirements Document) Parser
-│   ├── brd_input_cleaner.json         # ⚠️ Main parser workflow (place here for final submission)
-│   ├── workflows/                      # Additional BRD parser workflow files
-│   ├── schemas/                        # JSON schemas for BRD validation
-│   └── utils/                          # Utility scripts for parsing
-│
-├── frontend/                           # Frontend application
-│   ├── src/                            # Source code
-│   ├── public/                         # Public assets
-│   └── components/                     # React/Vue components
-│
-├── sample_inputs/                      # Sample data and test inputs
-│   ├── brds/                           # Sample BRD documents
-│   └── examples/                       # Example input files
-│
-├── tests/                              # Test suites
-│   ├── unit/                           # Unit tests
-│   └── integration/                    # Integration tests
-│
-├── docs/                               # Project documentation
-│
-└── config/                             # Configuration files
-
+├── brd_parser/                 # FastAPI BRD Parser Service
+│   ├── main.py                # Parser implementation
+│   ├── Dockerfile
+│   └── README.md
+├── n8n_flows/                 # n8n Workflow Definitions
+│   ├── master_orchestrator.json
+│   ├── planning_agent/
+│   │   ├── engineering_plan/
+│   │   └── project_schedule/
+│   └── design_agent/          # Coming soon
+├── sample_inputs/             # Test data
+│   ├── brds/                  # Sample BRD files
+│   └── outputs/               # Generated artifacts (ignored by git)
+├── tests/integration/         # Automated tests
+│   ├── test_e2e_orchestrator.sh
+│   └── README.md
+├── docker-compose.yml         # Service orchestration
+├── README.md                  # This file
+└── SETUP.md                   # Detailed setup guide
 ```
 
-## Multi-Agent System Architecture
+---
 
-This project implements a **Multi-Agent BRD-to-Engineering System** with three core components:
+## 🧪 Testing
 
-1. **BRD Parser Agent** - Entry point that cleans and validates BRD input
-2. **Planning Agent** - Generates engineering plans and project schedules
-3. **Design Agent** - Creates architecture, PoC documents, and tech stack recommendations
-4. **Shared Components** - State management and error handling across all agents
+Run the automated end-to-end test:
 
-## Workflow
+```bash
+./tests/integration/test_e2e_orchestrator.sh sample_inputs/brds/brd_input_cleaner.json
+```
 
-1. **Design flows in n8n:** Use the n8n graphical interface to build your workflows
-2. **Export flows:** Save/export workflows as JSON files from n8n
-3. **Place in structure:** Move exported JSON files to appropriate agent folders
+**Expected Output:**
+```
+✓ END-TO-END TEST PASSED!
+```
 
-### Agent Workflow Placement
+---
 
-- **BRD Parser**: `brd_parser/brd_input_cleaner.json` (root of brd_parser/)
-- **Planning Agent**: `n8n_flows/planning_agent/[engineering_plan|project_schedule]/`
-- **Design Agent**: `n8n_flows/design_agent/[architecture|poc|tech_stack]/`
-- **Shared Nodes**: `n8n_flows/shared_nodes/`
+## 🤝 Contributing
 
-## Getting Started
+This is a personal project for learning and demonstration. Feel free to:
+- Fork and experiment
+- Submit issues for bugs
+- Suggest improvements
 
-### MVP (Minimum Viable Product)
-1. Set up n8n application
-2. Create your **BRD Input Parser** workflow in n8n
-3. Export the workflow and save it to `brd_parser/brd_input_cleaner.json`
-4. Create **shared nodes** for state management and error handling
-5. Add sample BRD documents to `sample_inputs/brds/`
-6. Write tests in the `tests/` directory
+---
 
-### Full Multi-Agent System
-1. Build Planning Agent workflows (engineering plan + project schedule)
-2. Build Design Agent workflows (architecture + PoC + tech stack)
-3. Integrate all agents using shared state management
-4. Implement error handling and fallback mechanisms
-5. Build frontend for user interaction
-6. Add comprehensive tests
+## 📜 License
 
-## Key Files
+MIT License - Feel free to use this project for learning and inspiration.
 
-- `brd_parser/brd_input_cleaner.json` - **Main BRD parser workflow** ⚠️ Required at root
-- `n8n_flows/planning_agent/` - Planning Agent workflows
-- `n8n_flows/design_agent/` - Design Agent workflows
-- `n8n_flows/shared_nodes/` - State management and error handling
-- `sample_inputs/brds/` - Sample BRD documents for testing
-- `tests/` - Test cases for validation
+---
 
-## Notes
+## 🙏 Acknowledgments
 
-- This structure ensures modularity and easy debugging
-- Each workflow should be self-contained and well-documented
-- Follow the submission guidelines for proper organization
+- **n8n** - Low-code workflow automation platform
+- **Anthropic** - Claude AI models for intelligent content generation
+- **FastAPI** - Modern Python web framework
 
+---
+
+## 📧 Contact
+
+**Author**: Uday Ammanagi  
+**GitHub**: [@engineerudays](https://github.com/engineerudays)
+
+---
+
+## 🎯 Roadmap
+
+### Phase 1: Planning Agent (✅ Complete)
+- [x] BRD Parser
+- [x] Engineering Plan Generator
+- [x] Project Schedule Generator
+- [x] Master Orchestrator
+- [x] End-to-end testing
+
+### Phase 2: Design Agent (🚧 In Progress)
+- [ ] Architecture Design Generator
+- [ ] Tech Stack Recommender
+- [ ] PoC Code Generator
+
+### Phase 3: Frontend (🔜 Planned)
+- [ ] Streamlit web interface
+- [ ] BRD upload functionality
+- [ ] Output visualization
+- [ ] PDF export
+
+### Phase 4: Enhancements (💡 Future)
+- [ ] Support for PDF BRD input
+- [ ] Multi-language support
+- [ ] Custom templates
+- [ ] Version control for artifacts
+
+---
+
+**⭐ If you find this project interesting, please star the repository!**
+
+**📖 Get started with the [SETUP.md](SETUP.md) guide.**
