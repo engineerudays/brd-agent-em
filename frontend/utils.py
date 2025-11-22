@@ -427,30 +427,52 @@ def display_project_schedule(schedule_data: Dict[str, Any]) -> None:
     if schedule.get('resource_allocation'):
         with st.expander("👥 Resource Allocation"):
             resources = schedule['resource_allocation']
-            if resources.get('team_assignments'):
-                for assignment in resources['team_assignments']:
-                    st.markdown(f"**{assignment.get('role', 'N/A')}:** {assignment.get('allocation', 'N/A')}")
+            # Handle both dict and list formats
+            if isinstance(resources, dict):
+                if resources.get('team_assignments'):
+                    for assignment in resources['team_assignments']:
+                        st.markdown(f"**{assignment.get('role', 'N/A')}:** {assignment.get('allocation', 'N/A')}")
+            elif isinstance(resources, list):
+                for item in resources:
+                    if isinstance(item, dict):
+                        role = item.get('role', item.get('name', 'N/A'))
+                        allocation = item.get('allocation', item.get('percentage', 'N/A'))
+                        st.markdown(f"**{role}:** {allocation}")
+                    else:
+                        st.markdown(f"- {item}")
     
     # Critical Path
     if schedule.get('critical_path'):
         with st.expander("🎯 Critical Path"):
             critical = schedule['critical_path']
-            if critical.get('tasks'):
+            # Handle both dict and list formats
+            if isinstance(critical, dict):
+                if critical.get('tasks'):
+                    st.markdown("**Critical Tasks:**")
+                    for task in critical['tasks']:
+                        st.markdown(f"- {task}")
+                elif critical.get('description'):
+                    st.markdown(critical['description'])
+            elif isinstance(critical, list):
                 st.markdown("**Critical Tasks:**")
-                for task in critical['tasks']:
+                for task in critical:
                     st.markdown(f"- {task}")
     
     # Assumptions & Constraints
     col1, col2 = st.columns(2)
     with col1:
         if schedule.get('assumptions'):
-            with st.expander(f"💡 Assumptions ({len(schedule['assumptions'])})"):
-                for assumption in schedule['assumptions']:
-                    st.markdown(f"- {assumption}")
+            assumptions = schedule['assumptions']
+            if isinstance(assumptions, list) and len(assumptions) > 0:
+                with st.expander(f"💡 Assumptions ({len(assumptions)})"):
+                    for assumption in assumptions:
+                        st.markdown(f"- {assumption}")
     
     with col2:
         if schedule.get('constraints'):
-            with st.expander(f"⚠️ Constraints ({len(schedule['constraints'])})"):
-                for constraint in schedule['constraints']:
-                    st.markdown(f"- {constraint}")
+            constraints = schedule['constraints']
+            if isinstance(constraints, list) and len(constraints) > 0:
+                with st.expander(f"⚠️ Constraints ({len(constraints)})"):
+                    for constraint in constraints:
+                        st.markdown(f"- {constraint}")
 
