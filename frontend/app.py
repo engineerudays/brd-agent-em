@@ -220,17 +220,26 @@ def render_processing_section(orchestrator_url: str):
 
 def process_brd(orchestrator_url: str):
     """Process the BRD through the orchestrator"""
+    # Prevent duplicate processing
+    if st.session_state.get('is_processing', False):
+        st.warning("⏳ Processing already in progress...")
+        return
+    
+    st.session_state['is_processing'] = True
+    
     with st.spinner("⏳ Processing BRD through multi-agent pipeline..."):
         result = utils.submit_brd_to_orchestrator(
             st.session_state['brd_data'],
             orchestrator_url
         )
         
+        st.session_state['is_processing'] = False
+        
         if result['success']:
             st.session_state['result'] = result['data']
             st.session_state['processing_complete'] = True
-            st.success("✅ BRD processed successfully!")
-            st.rerun()
+            st.success("✅ BRD processed successfully! Check the 'Results' and 'Timeline' tabs.")
+            # Don't rerun - let Streamlit naturally update the UI
         else:
             st.error(f"❌ Processing failed: {result.get('error', 'Unknown error')}")
             if result.get('status_code'):
@@ -333,7 +342,7 @@ def render_timeline_tab():
 
 def clear_session():
     """Clear session state"""
-    keys_to_clear = ['brd_data', 'brd_text', 'result', 'processing_complete']
+    keys_to_clear = ['brd_data', 'brd_text', 'result', 'processing_complete', 'is_processing']
     for key in keys_to_clear:
         if key in st.session_state:
             del st.session_state[key]
@@ -345,6 +354,8 @@ def main():
     # Initialize session state
     if 'processing_complete' not in st.session_state:
         st.session_state['processing_complete'] = False
+    if 'is_processing' not in st.session_state:
+        st.session_state['is_processing'] = False
     
     # Render header
     render_header()
