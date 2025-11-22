@@ -99,6 +99,19 @@
     },
     {
       "parameters": {
+        "jsCode": "// Normalize BRD format to ensure compatibility with Engineering Plan Generator\n// The generator expects: {raw_brd_text: \"...\"}\n\nconst inputData = $input.item.json;\n\n// Check if raw_brd_text already exists\nif (inputData.raw_brd_text) {\n  // Already in correct format, pass through\n  return { json: { raw_brd_text: inputData.raw_brd_text } };\n}\n\n// Convert structured BRD data to raw_brd_text format\nconst brdData = inputData;\nconst raw_brd_text = JSON.stringify(brdData);\n\nreturn { \n  json: { \n    raw_brd_text: raw_brd_text \n  } \n};"
+      },
+      "id": "normalize-brd-format-001",
+      "name": "Normalize BRD Format",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -360,
+        304
+      ]
+    },
+    {
+      "parameters": {
         "method": "POST",
         "url": "http://host.docker.internal:5678/webhook/planning-agent/engineering-plan",
         "sendBody": true,
@@ -246,7 +259,7 @@
       "main": [
         [
           {
-            "node": "Generate Engineering Plan",
+            "node": "Normalize BRD Format",
             "type": "main",
             "index": 0
           }
@@ -254,6 +267,17 @@
       ]
     },
     "Use Direct Input": {
+      "main": [
+        [
+          {
+            "node": "Normalize BRD Format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize BRD Format": {
       "main": [
         [
           {
