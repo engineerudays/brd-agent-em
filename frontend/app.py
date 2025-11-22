@@ -4,6 +4,7 @@ Multi-Agent Engineering Manager Interface
 """
 import streamlit as st
 import json
+import base64
 from pathlib import Path
 import sys
 
@@ -131,13 +132,38 @@ def render_input_tab():
     # Input method selection
     input_method = st.radio(
         "Input Method",
-        ["Upload JSON File", "Paste JSON", "Load Sample"],
-        horizontal=True
+        ["Upload PDF File", "Upload JSON File", "Paste JSON", "Load Sample"],
+        horizontal=True,
+        help="Choose how to provide your Business Requirements Document"
     )
     
     brd_text = None
+    brd_data = None
+    is_pdf = False
     
-    if input_method == "Upload JSON File":
+    if input_method == "Upload PDF File":
+        uploaded_file = st.file_uploader(
+            "Upload BRD PDF file",
+            type=["pdf"],
+            help="Upload a Business Requirements Document in PDF format - it will be parsed automatically"
+        )
+        
+        if uploaded_file:
+            # Read PDF and convert to base64
+            pdf_bytes = uploaded_file.read()
+            pdf_base64 = base64.b64encode(pdf_bytes).decode('utf-8')
+            
+            # Store as BRD data with pdf_file field
+            brd_data = {
+                "pdf_file": pdf_base64,
+                "filename": uploaded_file.name
+            }
+            is_pdf = True
+            
+            st.success(f"✅ PDF Loaded: {uploaded_file.name} ({len(pdf_bytes) / 1024:.1f} KB)")
+            st.info("📄 PDF will be parsed automatically by the backend")
+            
+    elif input_method == "Upload JSON File":
         uploaded_file = st.file_uploader(
             "Upload BRD JSON file",
             type=["json"],
@@ -169,7 +195,13 @@ def render_input_tab():
         else:
             st.warning("Sample BRD not found. Please use Upload or Paste method.")
     
-    # Display and validate BRD
+    # Handle PDF upload (already validated)
+    if is_pdf and brd_data:
+        st.session_state['brd_data'] = brd_data
+        st.session_state['is_pdf'] = True
+        return True
+    
+    # Display and validate JSON BRD
     if brd_text:
         st.subheader("BRD Preview")
         
@@ -186,6 +218,7 @@ def render_input_tab():
             # Store in session state
             st.session_state['brd_data'] = parsed_data
             st.session_state['brd_text'] = brd_text
+            st.session_state['is_pdf'] = False
             
             return True
         else:
@@ -398,7 +431,7 @@ def render_timeline_tab():
 
 def clear_session():
     """Clear session state"""
-    keys_to_clear = ['brd_data', 'brd_text', 'result', 'processing_complete', 'is_processing']
+    keys_to_clear = ['brd_data', 'brd_text', 'result', 'processing_complete', 'is_processing', 'is_pdf']
     for key in keys_to_clear:
         if key in st.session_state:
             del st.session_state[key]
