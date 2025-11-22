@@ -261,3 +261,196 @@ def load_sample_brd(file_path: str) -> Optional[str]:
         print(f"Error loading sample BRD: {e}")
         return None
 
+
+def display_engineering_plan(plan_data: Dict[str, Any]) -> None:
+    """Display engineering plan in a structured, human-readable format."""
+    import streamlit as st
+    
+    if not plan_data:
+        st.warning("No engineering plan data available.")
+        return
+    
+    # Extract the plan (might be nested)
+    plan = plan_data.get('engineering_plan', plan_data)
+    
+    if not plan:
+        st.warning("Engineering plan is empty.")
+        return
+    
+    # Project Overview
+    if plan.get('project_overview'):
+        with st.expander("📋 Project Overview", expanded=True):
+            overview = plan['project_overview']
+            st.markdown(f"**Project Name:** {overview.get('name', 'N/A')}")
+            st.markdown(f"**Description:** {overview.get('description', 'N/A')}")
+            if overview.get('objectives'):
+                st.markdown("**Objectives:**")
+                for obj in overview['objectives']:
+                    st.markdown(f"- {obj}")
+    
+    # Feature Breakdown
+    if plan.get('feature_breakdown'):
+        with st.expander(f"🎯 Feature Breakdown ({len(plan['feature_breakdown'])} features)"):
+            for feature in plan['feature_breakdown']:
+                st.markdown(f"### {feature.get('feature_id', 'N/A')}: {feature.get('feature_name', 'Unnamed')}")
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("Priority", feature.get('priority', 'N/A'))
+                with col2:
+                    st.metric("Complexity", feature.get('complexity', 'N/A'))
+                with col3:
+                    st.metric("Effort", feature.get('estimated_effort', 'N/A'))
+                
+                st.markdown(f"**Description:** {feature.get('description', 'N/A')}")
+                
+                if feature.get('technical_requirements'):
+                    st.markdown("**Technical Requirements:**")
+                    for req in feature['technical_requirements']:
+                        st.markdown(f"- {req}")
+                
+                st.divider()
+    
+    # Technical Architecture
+    if plan.get('technical_architecture'):
+        with st.expander("🏗️ Technical Architecture"):
+            arch = plan['technical_architecture']
+            if arch.get('system_components'):
+                st.markdown("**System Components:**")
+                for comp in arch['system_components']:
+                    st.markdown(f"- {comp}")
+            if arch.get('integration_points'):
+                st.markdown("**Integration Points:**")
+                for integration in arch['integration_points']:
+                    st.markdown(f"- {integration}")
+            if arch.get('data_flow'):
+                st.markdown(f"**Data Flow:** {arch['data_flow']}")
+    
+    # Implementation Phases
+    if plan.get('implementation_phases'):
+        with st.expander(f"📅 Implementation Phases ({len(plan['implementation_phases'])} phases)"):
+            for phase in plan['implementation_phases']:
+                st.markdown(f"### Phase {phase.get('phase_number', 'N/A')}: {phase.get('phase_name', 'Unnamed')}")
+                st.markdown(f"**Duration:** {phase.get('estimated_duration', 'N/A')}")
+                st.markdown(f"**Description:** {phase.get('description', 'N/A')}")
+                if phase.get('features_included'):
+                    st.markdown("**Features:**")
+                    for feat in phase['features_included']:
+                        st.markdown(f"- {feat}")
+                st.divider()
+    
+    # Risk Analysis
+    if plan.get('risk_analysis'):
+        with st.expander(f"⚠️ Risk Analysis ({len(plan['risk_analysis'])} risks)"):
+            for risk in plan['risk_analysis']:
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    st.markdown(f"**{risk.get('risk_id', 'N/A')}:** {risk.get('description', 'N/A')}")
+                with col2:
+                    impact = risk.get('impact', 'N/A')
+                    color = "🔴" if impact == "High" else "🟡" if impact == "Medium" else "🟢"
+                    st.markdown(f"{color} Impact: {impact}")
+                st.markdown(f"*Mitigation:* {risk.get('mitigation_strategy', 'N/A')}")
+                st.divider()
+    
+    # Resource Requirements
+    if plan.get('resource_requirements'):
+        with st.expander("👥 Resource Requirements"):
+            resources = plan['resource_requirements']
+            if resources.get('team_composition'):
+                st.markdown("**Team:**")
+                for member in resources['team_composition']:
+                    st.markdown(f"- {member}")
+            if resources.get('tools_and_technologies'):
+                st.markdown("**Technologies:**")
+                st.markdown(", ".join(resources['tools_and_technologies']))
+    
+    # Success Metrics
+    if plan.get('success_metrics'):
+        with st.expander(f"📊 Success Metrics ({len(plan['success_metrics'])} metrics)"):
+            for metric in plan['success_metrics']:
+                st.markdown(f"**{metric.get('metric_name', 'Unnamed')}**")
+                st.markdown(f"- Target: {metric.get('target_value', 'N/A')}")
+                st.markdown(f"- Measurement: {metric.get('measurement_method', 'N/A')}")
+                st.divider()
+
+
+def display_project_schedule(schedule_data: Dict[str, Any]) -> None:
+    """Display project schedule in a structured, human-readable format."""
+    import streamlit as st
+    
+    if not schedule_data:
+        st.warning("No project schedule data available.")
+        return
+    
+    # Extract the schedule (might be nested)
+    schedule = schedule_data.get('project_schedule', schedule_data)
+    
+    if not schedule:
+        st.warning("Project schedule is empty.")
+        return
+    
+    # Project Info
+    if schedule.get('project_info'):
+        with st.expander("ℹ️ Project Information", expanded=True):
+            info = schedule['project_info']
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Start Date", info.get('start_date', 'N/A'))
+            with col2:
+                st.metric("End Date", info.get('end_date', 'N/A'))
+            with col3:
+                duration = info.get('total_duration_weeks', 0)
+                st.metric("Duration", f"{duration} weeks")
+    
+    # Phases and Tasks
+    if schedule.get('phases'):
+        with st.expander(f"📅 Project Phases ({len(schedule['phases'])} phases)", expanded=True):
+            for phase in schedule['phases']:
+                st.markdown(f"### {phase.get('phase_name', 'Unnamed Phase')}")
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.markdown(f"**Start:** {phase.get('start_date', 'N/A')}")
+                with col2:
+                    st.markdown(f"**End:** {phase.get('end_date', 'N/A')}")
+                with col3:
+                    st.markdown(f"**Duration:** {phase.get('duration_weeks', 'N/A')} weeks")
+                
+                # Milestones
+                if phase.get('milestones'):
+                    st.markdown("**Milestones:**")
+                    for milestone in phase['milestones']:
+                        st.markdown(f"- 📍 {milestone.get('name', 'Unnamed')} ({milestone.get('target_date', 'TBD')})")
+                
+                st.divider()
+    
+    # Resource Allocation
+    if schedule.get('resource_allocation'):
+        with st.expander("👥 Resource Allocation"):
+            resources = schedule['resource_allocation']
+            if resources.get('team_assignments'):
+                for assignment in resources['team_assignments']:
+                    st.markdown(f"**{assignment.get('role', 'N/A')}:** {assignment.get('allocation', 'N/A')}")
+    
+    # Critical Path
+    if schedule.get('critical_path'):
+        with st.expander("🎯 Critical Path"):
+            critical = schedule['critical_path']
+            if critical.get('tasks'):
+                st.markdown("**Critical Tasks:**")
+                for task in critical['tasks']:
+                    st.markdown(f"- {task}")
+    
+    # Assumptions & Constraints
+    col1, col2 = st.columns(2)
+    with col1:
+        if schedule.get('assumptions'):
+            with st.expander(f"💡 Assumptions ({len(schedule['assumptions'])})"):
+                for assumption in schedule['assumptions']:
+                    st.markdown(f"- {assumption}")
+    
+    with col2:
+        if schedule.get('constraints'):
+            with st.expander(f"⚠️ Constraints ({len(schedule['constraints'])})"):
+                for constraint in schedule['constraints']:
+                    st.markdown(f"- {constraint}")
+

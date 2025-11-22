@@ -285,13 +285,41 @@ def render_results_tab():
     
     st.divider()
     
-    # Show full response
-    with st.expander("📄 View Full Response"):
+    # Engineering Plan Section
+    if result.get('engineering_plan'):
+        st.header("🎯 Engineering Plan")
+        utils.display_engineering_plan(result['engineering_plan'])
+        
+        # Download button for engineering plan
+        st.download_button(
+            label="💾 Download Engineering Plan",
+            data=json.dumps(result['engineering_plan'], indent=2),
+            file_name=f"engineering_plan_{summary.get('timestamp', 'unknown')[:10]}.json",
+            mime="application/json"
+        )
+        st.divider()
+    
+    # Project Schedule Section
+    if result.get('project_schedule'):
+        st.header("📅 Project Schedule")
+        utils.display_project_schedule(result['project_schedule'])
+        
+        # Download button for project schedule
+        st.download_button(
+            label="💾 Download Project Schedule",
+            data=json.dumps(result['project_schedule'], indent=2),
+            file_name=f"project_schedule_{summary.get('timestamp', 'unknown')[:10]}.json",
+            mime="application/json"
+        )
+        st.divider()
+    
+    # Show full response (collapsed by default)
+    with st.expander("📄 View Full JSON Response"):
         st.json(result)
     
-    # Download button
+    # Download button for full response
     st.download_button(
-        label="💾 Download Full Response",
+        label="💾 Download Full Response (JSON)",
         data=json.dumps(result, indent=2),
         file_name=f"brd_processing_result_{summary.get('timestamp', 'unknown')[:10]}.json",
         mime="application/json"
@@ -308,32 +336,46 @@ def render_timeline_tab():
     
     result = st.session_state['result']
     
-    # Note about where schedule data would be
-    st.info("📌 **Note:** Timeline visualization requires project schedule data from the orchestrator response.")
+    # Check if we have project schedule data
+    if not result.get('project_schedule'):
+        st.warning("No project schedule data available in the response.")
+        with st.expander("ℹ️ Troubleshooting"):
+            st.markdown("""
+            Project schedules are generated and saved to `sample_inputs/outputs/project_schedules/`.
+            
+            If you don't see the timeline here:
+            1. Check the 'Results' tab for the project schedule data
+            2. Re-import the updated Master Orchestrator workflow in n8n
+            3. Check the generated JSON files in the output folder
+            """)
+        return
     
-    # Try to create Gantt chart from response
-    # The actual schedule is saved to files, not returned in response
-    # So we'll show a message about this
+    # Create and display Gantt chart
+    gantt_fig = utils.create_gantt_chart(result['project_schedule'])
     
-    with st.expander("ℹ️ About Timeline Data"):
-        st.markdown("""
-        The project schedule is generated and saved to:
-        - `sample_inputs/outputs/project_schedules/`
-        
-        The timeline includes:
-        - **Phases** - Major implementation phases
-        - **Milestones** - Key deliverables and checkpoints
-        - **Tasks** - Detailed task breakdown
-        - **Resource Allocation** - Team assignments
-        - **Critical Path** - Dependencies and blockers
-        
-        To view the full project schedule:
-        1. Check the output directory for the generated JSON file
-        2. The filename includes the project name and timestamp
-        """)
+    if gantt_fig:
+        st.plotly_chart(gantt_fig, use_container_width=True)
+        st.success("✅ Interactive timeline generated successfully")
+    else:
+        st.warning("Could not generate Gantt chart. The schedule data might be incomplete.")
     
-    # Show message about accessing full schedule
-    st.success("✅ Project schedule generated and saved to outputs directory")
+    st.divider()
+    
+    # Show schedule summary
+    schedule = result['project_schedule'].get('project_schedule', result['project_schedule'])
+    if schedule.get('project_info'):
+        st.subheader("📊 Schedule Overview")
+        info = schedule['project_info']
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("Start Date", info.get('start_date', 'N/A'))
+        with col2:
+            st.metric("End Date", info.get('end_date', 'N/A'))
+        with col3:
+            st.metric("Total Duration", f"{info.get('total_duration_weeks', 0)} weeks")
+        with col4:
+            phases_count = len(schedule.get('phases', []))
+            st.metric("Phases", phases_count)
     
     note_message = result.get("note", "")
     if note_message:
