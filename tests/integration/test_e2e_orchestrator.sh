@@ -12,7 +12,7 @@ echo ""
 # Configuration
 N8N_URL="http://localhost:5678"
 BRD_PARSER_URL="http://localhost:8000"
-ORCHESTRATOR_URL="$N8N_URL/webhook/orchestrator/process-brd"
+ORCHESTRATOR_URL="$N8N_URL/webhook/orchestrator/process-brd-v2"
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -245,16 +245,13 @@ if [ "$HTTP_CODE" = "200" ]; then
     echo "📊 Results:"
     echo ""
     
-    # Parse and display results
+    # Parse and display simplified results
     RESULT_SUMMARY=$(echo "$RESPONSE_BODY" | jq '{
-      orchestration_id: .orchestration_id,
       status: .status,
-      duration: .metadata.duration_seconds,
-      stages: .stages,
-      project_name: .results.parsed_brd.project.name,
-      features_count: (.results.parsed_brd.features | length),
-      engineering_plan_phases: (.results.engineering_plan.engineering_plan.implementation_phases | length // 0),
-      schedule_timeline: .results.project_schedule.project_schedule.project_info.total_duration_weeks
+      message: .message,
+      stages_completed: .stages_completed,
+      timestamp: .timestamp,
+      note: .note
     }')
     
     if [ $? -ne 0 ] || [ -z "$RESULT_SUMMARY" ]; then
@@ -274,7 +271,7 @@ if [ "$HTTP_CODE" = "200" ]; then
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
     print_status "All stages completed:"
-    echo "$RESPONSE_BODY" | jq -r '.stages | to_entries[] | "  \(.key): \(.value)"'
+    echo "$RESPONSE_BODY" | jq -r '.stages_completed[] | "  ✓ " + .'
     
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

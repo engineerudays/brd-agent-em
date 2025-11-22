@@ -4,7 +4,7 @@
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "orchestrator/process-brd",
+        "path": "orchestrator/process-brd-v2",
         "responseMode": "responseNode",
         "options": {}
       },
@@ -16,11 +16,11 @@
         -1360,
         304
       ],
-      "webhookId": "orchestrator-process-brd"
+      "webhookId": "orchestrator-process-brd-v2"
     },
     {
       "parameters": {
-        "jsCode": "// Initialize orchestration state\nconst inputData = $input.item.json.body;\n\nreturn {\n  json: {\n    orchestration_id: `orch_${Date.now()}`,\n    input_data: inputData,\n    status: 'started',\n    stages: {\n      brd_parsing: 'pending',\n      engineering_plan: 'pending',\n      project_schedule: 'pending'\n    },\n    results: {},\n    started_at: new Date().toISOString()\n  }\n};"
+        "jsCode": "// Extract and validate input data\nconst inputData = $input.item.json.body;\n\nif (!inputData) {\n  throw new Error('Invalid request: body is required');\n}\n\n// Pass through the input for downstream processing\nreturn {\n  json: inputData\n};"
       },
       "id": "d0369c0a-c468-47b2-9f4a-473f8a2d8cff",
       "name": "Initialize Orchestration",
@@ -36,7 +36,7 @@
         "conditions": {
           "string": [
             {
-              "value1": "={{$json.input_data.pdf_file}}",
+              "value1": "={{$json.pdf_file}}",
               "operation": "isNotEmpty"
             }
           ]
@@ -57,7 +57,7 @@
         "url": "http://host.docker.internal:5678/webhook/brd-parser/upload",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ {body: $json.input_data} }}",
+        "jsonBody": "={{ {body: $json} }}",
         "options": {
           "timeout": 90000
         }
@@ -73,10 +73,10 @@
     },
     {
       "parameters": {
-        "jsCode": "// Update state with parsed BRD\nconst state = $input.all()[0].json;\nconst parseResponse = $input.item.json;\n\nif (parseResponse.status !== 'success') {\n  throw new Error('BRD parsing failed: ' + parseResponse.message);\n}\n\nstate.stages.brd_parsing = 'completed';\nstate.results.parsed_brd = parseResponse.parsed_brd;\nstate.results.parse_metadata = parseResponse.metadata;\n\nreturn { json: state };"
+        "jsCode": "// Extract parsed BRD from parser response\nconst parseResponse = $input.item.json;\n\nif (parseResponse.status !== 'success') {\n  throw new Error('BRD parsing failed: ' + (parseResponse.message || 'Unknown error'));\n}\n\n// Pass the parsed BRD to the next stage\nreturn { json: parseResponse.parsed_brd };"
       },
       "id": "55a55e48-d559-4259-b229-8221c717f47e",
-      "name": "Update After Parsing",
+      "name": "Extract Parsed BRD",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -86,10 +86,10 @@
     },
     {
       "parameters": {
-        "jsCode": "// Skip parsing, use direct JSON input\nconst state = $input.item.json;\n\nstate.stages.brd_parsing = 'skipped';\nstate.results.parsed_brd = state.input_data.brd_data || state.input_data;\n\nreturn { json: state };"
+        "jsCode": "// Use direct JSON input (no parsing needed)\nconst inputData = $input.item.json;\n\n// Extract BRD data if wrapped, otherwise use as-is\nconst brdData = inputData.brd_data || inputData;\n\nreturn { json: brdData };"
       },
       "id": "0dc511c4-727c-4b8b-8440-8ced31e18395",
-      "name": "Skip Parsing",
+      "name": "Use Direct Input",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -99,24 +99,11 @@
     },
     {
       "parameters": {
-        "jsCode": "// Merge both paths\nreturn { json: $input.item.json };"
-      },
-      "id": "ed6859e9-ae35-499f-9af2-0d1992bbd31a",
-      "name": "Merge After Parsing",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -368,
-        304
-      ]
-    },
-    {
-      "parameters": {
         "method": "POST",
         "url": "http://host.docker.internal:5678/webhook/planning-agent/engineering-plan",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ $json.results.parsed_brd }}",
+        "jsonBody": "={{ $json }}",
         "options": {
           "timeout": 120000
         }
@@ -165,27 +152,14 @@
     },
     {
       "parameters": {
-        "jsCode": "// Project schedule generated successfully  \n// Files are already saved by the child workflow\nconst scheduleResponse = $input.item.json;\n\nreturn { \n  json: {\n    stage: \"project_schedule\",\n    status: \"completed\",\n    response: scheduleResponse\n  }\n};"
+        "jsCode": "// Pipeline completed successfully\n// All artifacts (engineering plan, project schedule) have been generated and saved\n\nreturn {\n  json: {\n    status: \"success\",\n    message: \"BRD processed successfully through entire pipeline\",\n    stages_completed: [\n      \"brd_parsing\",\n      \"engineering_plan\", \n      \"project_schedule\"\n    ],\n    timestamp: new Date().toISOString(),\n    note: \"Generated files saved to sample_inputs/outputs/\"\n  }\n};"
       },
-      "id": "1b1bc473-249c-43fd-a9e7-3963a164aed6",
-      "name": "Finalize Orchestration",
+      "id": "5dc96c5f-83a7-4d5c-9301-d402d5d98796",
+      "name": "Prepare Success Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
         448,
-        304
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "// Return simple success response\n// Actual files are already saved by child workflows\nreturn {\n  json: {\n    status: \"success\",\n    message: \"BRD processed successfully through entire pipeline\",\n    stages_completed: [\n      \"brd_parsing\",\n      \"engineering_plan\", \n      \"project_schedule\"\n    ],\n    timestamp: new Date().toISOString(),\n    note: \"Generated files saved to sample_inputs/outputs/\"\n  }\n};"
-      },
-      "id": "5dc96c5f-83a7-4d5c-9301-d402d5d98796",
-      "name": "Prepare Response",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        640,
         304
       ]
     },
@@ -250,7 +224,7 @@
         ],
         [
           {
-            "node": "Skip Parsing",
+            "node": "Use Direct Input",
             "type": "main",
             "index": 0
           }
@@ -261,36 +235,25 @@
       "main": [
         [
           {
-            "node": "Update After Parsing",
+            "node": "Extract Parsed BRD",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Update After Parsing": {
+    "Extract Parsed BRD": {
       "main": [
         [
           {
-            "node": "Merge After Parsing",
+            "node": "Generate Engineering Plan",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Skip Parsing": {
-      "main": [
-        [
-          {
-            "node": "Merge After Parsing",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Merge After Parsing": {
+    "Use Direct Input": {
       "main": [
         [
           {
@@ -327,25 +290,14 @@
       "main": [
         [
           {
-            "node": "Finalize Orchestration",
+            "node": "Prepare Success Response",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Finalize Orchestration": {
-      "main": [
-        [
-          {
-            "node": "Prepare Response",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Prepare Response": {
+    "Prepare Success Response": {
       "main": [
         [
           {
