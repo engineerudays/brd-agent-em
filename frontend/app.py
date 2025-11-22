@@ -235,6 +235,9 @@ def process_brd(orchestrator_url: str):
             st.error(f"❌ Processing failed: {result.get('error', 'Unknown error')}")
             if result.get('status_code'):
                 st.caption(f"HTTP Status Code: {result['status_code']}")
+            if result.get('debug_info'):
+                with st.expander("🔍 Debug Information"):
+                    st.text(result['debug_info'])
 
 
 def render_results_tab():

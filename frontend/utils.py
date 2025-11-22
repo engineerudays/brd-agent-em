@@ -29,11 +29,32 @@ def submit_brd_to_orchestrator(brd_data: Dict[str, Any], orchestrator_url: str) 
             timeout=180  # 3 minutes timeout
         )
         response.raise_for_status()
-        return {
-            "success": True,
-            "data": response.json(),
-            "status_code": response.status_code
-        }
+        
+        # Check if response has content
+        if not response.content:
+            return {
+                "success": False,
+                "error": "Empty response from orchestrator. Check if the workflow is activated in n8n.",
+                "status_code": response.status_code,
+                "debug_info": f"URL: {orchestrator_url}"
+            }
+        
+        # Try to parse JSON
+        try:
+            json_data = response.json()
+            return {
+                "success": True,
+                "data": json_data,
+                "status_code": response.status_code
+            }
+        except json.JSONDecodeError as je:
+            return {
+                "success": False,
+                "error": f"Invalid JSON response: {str(je)}",
+                "status_code": response.status_code,
+                "debug_info": f"Response preview: {response.text[:500]}"
+            }
+            
     except requests.exceptions.Timeout:
         return {
             "success": False,
@@ -41,10 +62,20 @@ def submit_brd_to_orchestrator(brd_data: Dict[str, Any], orchestrator_url: str) 
             "status_code": 0
         }
     except requests.exceptions.RequestException as e:
+        error_msg = str(e)
+        debug_info = ""
+        
+        if hasattr(e, 'response') and e.response is not None:
+            try:
+                debug_info = f"Response: {e.response.text[:500]}"
+            except:
+                debug_info = "Could not read response text"
+        
         return {
             "success": False,
-            "error": str(e),
-            "status_code": getattr(e.response, 'status_code', 0) if hasattr(e, 'response') else 0
+            "error": error_msg,
+            "status_code": getattr(e.response, 'status_code', 0) if hasattr(e, 'response') else 0,
+            "debug_info": debug_info
         }
 
 
