@@ -174,7 +174,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{JSON.stringify($json, null, 2)}}",
+        "responseBody": "={{ $json }}",
         "options": {
           "responseCode": 200,
           "responseHeaders": {
