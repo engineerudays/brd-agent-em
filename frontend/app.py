@@ -358,6 +358,20 @@ def render_timeline_tab():
         st.success("✅ Interactive timeline generated successfully")
     else:
         st.warning("Could not generate Gantt chart. The schedule data might be incomplete.")
+        
+        # Debug info
+        with st.expander("🔍 Debug: Schedule Data Structure"):
+            schedule = result['project_schedule']
+            st.write("**Available keys:**")
+            if isinstance(schedule, dict):
+                st.json(list(schedule.keys()))
+                if 'project_schedule' in schedule:
+                    st.write("**Nested project_schedule keys:**")
+                    st.json(list(schedule['project_schedule'].keys()) if isinstance(schedule['project_schedule'], dict) else "Not a dict")
+                    if isinstance(schedule['project_schedule'], dict) and 'phases' in schedule['project_schedule']:
+                        st.write(f"**Number of phases:** {len(schedule['project_schedule']['phases'])}")
+            else:
+                st.write("Schedule is not a dictionary")
     
     st.divider()
     

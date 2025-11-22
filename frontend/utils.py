@@ -128,10 +128,17 @@ def create_gantt_chart(schedule_data: Dict[str, Any]) -> Optional[go.Figure]:
         Plotly figure or None if data is invalid
     """
     try:
-        project_schedule = schedule_data.get("project_schedule", {})
+        # Handle different nesting levels of schedule data
+        if "project_schedule" in schedule_data:
+            project_schedule = schedule_data["project_schedule"]
+        else:
+            project_schedule = schedule_data
+        
+        # Extract phases - might be directly in the object or nested
         phases = project_schedule.get("phases", [])
         
-        if not phases:
+        if not phases or len(phases) == 0:
+            print(f"No phases found. Available keys: {project_schedule.keys() if isinstance(project_schedule, dict) else 'not a dict'}")
             return None
             
         # Prepare data for Gantt chart
