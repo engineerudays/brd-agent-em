@@ -162,6 +162,7 @@ def render_input_tab():
             
             st.success(f"✅ PDF Loaded: {uploaded_file.name} ({len(pdf_bytes) / 1024:.1f} KB)")
             st.info("📄 PDF will be parsed automatically by the backend")
+            st.toast(f"✅ PDF loaded: {uploaded_file.name}", icon="📄")
             
     elif input_method == "Upload JSON File":
         uploaded_file = st.file_uploader(
@@ -210,6 +211,7 @@ def render_input_tab():
         
         if is_valid:
             st.success("✅ Valid BRD JSON")
+            st.toast("✅ BRD validated successfully", icon="✓")
             
             # Show preview
             with st.expander("View BRD Details", expanded=False):
@@ -256,9 +258,11 @@ def process_brd(orchestrator_url: str):
     # Prevent duplicate processing
     if st.session_state.get('is_processing', False):
         st.warning("⏳ Processing already in progress...")
+        st.toast("⏳ Already processing...", icon="⚠️")
         return
     
     st.session_state['is_processing'] = True
+    st.toast("🚀 Starting BRD processing...", icon="⚙️")
     
     with st.spinner("⏳ Processing BRD through multi-agent pipeline..."):
         result = utils.submit_brd_to_orchestrator(
@@ -274,12 +278,19 @@ def process_brd(orchestrator_url: str):
             
             # Show success message with retry info if applicable
             success_msg = "✅ BRD processed successfully! Check the 'Results' and 'Timeline' tabs."
+            toast_msg = "✅ Processing complete!"
             if result.get('attempts', 1) > 1:
                 success_msg += f" (Completed after {result['attempts']} attempts)"
+                toast_msg += f" ({result['attempts']} attempts)"
+            
             st.success(success_msg)
+            st.toast(toast_msg, icon="🎉")
             # Don't rerun - let Streamlit naturally update the UI
         else:
-            st.error(f"❌ Processing failed: {result.get('error', 'Unknown error')}")
+            error_msg = result.get('error', 'Unknown error')
+            st.error(f"❌ Processing failed: {error_msg}")
+            st.toast(f"❌ Processing failed: {error_msg[:50]}...", icon="🚨")
+            
             if result.get('attempts'):
                 st.caption(f"Attempts made: {result['attempts']}")
             if result.get('status_code'):
@@ -442,6 +453,7 @@ def clear_session():
     for key in keys_to_clear:
         if key in st.session_state:
             del st.session_state[key]
+    st.toast("🗑️ Workspace cleared", icon="🧹")
     st.rerun()
 
 
