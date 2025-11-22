@@ -12,7 +12,10 @@
       "name": "Webhook - Receive Parsed BRD",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
-      "position": [250, 300],
+      "position": [
+        250,
+        300
+      ],
       "webhookId": "planning-agent-engineering-plan"
     },
     {
@@ -30,37 +33,36 @@
       "name": "Validate BRD Input",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
-      "position": [450, 300]
+      "position": [
+        450,
+        300
+      ]
     },
     {
       "parameters": {
-        "jsCode": "// Parse the incoming BRD data\nconst brdText = $input.item.json.body.raw_brd_text;\nlet parsedBRD;\n\ntry {\n  parsedBRD = typeof brdText === 'string' ? JSON.parse(brdText) : brdText;\n} catch (error) {\n  throw new Error('Invalid BRD format: ' + error.message);\n}\n\n// Extract key information for engineering plan PLUS keep the full BRD\nconst extractedData = {\n  document_title: parsedBRD.document_info?.title || 'Untitled Project',\n  business_objectives: parsedBRD.business_objectives || [],\n  functional_requirements: parsedBRD.requirements?.functional || [],\n  non_functional_requirements: parsedBRD.requirements?.non_functional || [],\n  in_scope: parsedBRD.project_scope?.in_scope || [],\n  out_scope: parsedBRD.project_scope?.out_of_scope || [],\n  constraints: parsedBRD.constraints_assumptions_dependencies?.constraints || [],\n  assumptions: parsedBRD.constraints_assumptions_dependencies?.assumptions || [],\n  dependencies: parsedBRD.constraints_assumptions_dependencies?.dependencies || [],\n  stakeholders: parsedBRD.stakeholders || [],\n  timestamp: new Date().toISOString(),\n  // IMPORTANT: Keep the full BRD for comprehensive context\n  full_brd: parsedBRD\n};\n\nreturn { json: extractedData };"
+        "jsCode": "// Parse the incoming BRD data\nconst brdText = $input.item.json.body.raw_brd_text;\nlet parsedBRD;\n\ntry {\n  parsedBRD = typeof brdText === 'string' ? JSON.parse(brdText) : brdText;\n} catch (error) {\n  throw new Error('Invalid BRD format: ' + error.message);\n}\n\n// Extract key information for engineering plan\nconst extractedData = {\n  document_title: parsedBRD.document_info?.title || 'Untitled Project',\n  business_objectives: parsedBRD.business_objectives || [],\n  functional_requirements: parsedBRD.requirements?.functional || [],\n  non_functional_requirements: parsedBRD.requirements?.non_functional || [],\n  in_scope: parsedBRD.project_scope?.in_scope || [],\n  out_scope: parsedBRD.project_scope?.out_of_scope || [],\n  constraints: parsedBRD.constraints_assumptions_dependencies?.constraints || [],\n  assumptions: parsedBRD.constraints_assumptions_dependencies?.assumptions || [],\n  dependencies: parsedBRD.constraints_assumptions_dependencies?.dependencies || [],\n  stakeholders: parsedBRD.stakeholders || [],\n  timestamp: new Date().toISOString(),\n  // IMPORTANT: Keep the full BRD for comprehensive context\n  full_brd: parsedBRD\n};\n\nreturn { json: extractedData };"
       },
       "id": "parse-brd-001",
       "name": "Parse BRD Data",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [650, 300]
+      "position": [
+        650,
+        300
+      ]
     },
     {
       "parameters": {
-        "jsCode": "// Prepare the prompt for Anthropic API\nconst data = $input.item.json;\n\n// Get the full parsed BRD for maximum context\nconst fullBRD = data.full_brd || data;\n\nconst prompt = `You are an expert Software Engineering Manager and Technical Architect. Your task is to create a comprehensive, structured engineering plan based on a Business Requirements Document (BRD).\n\nHere is the complete BRD:\n${JSON.stringify(fullBRD, null, 2)}\n\nPlease analyze this BRD thoroughly and generate a detailed, comprehensive Structured Engineering Plan in JSON format with the following structure:\n\n{\n  \"engineering_plan\": {\n    \"project_overview\": {\n      \"name\": \"string\",\n      \"description\": \"string\",\n      \"objectives\": [\"string\"]\n    },\n    \"feature_breakdown\": [\n      {\n        \"feature_id\": \"string\",\n        \"feature_name\": \"string\",\n        \"description\": \"string\",\n        \"priority\": \"Critical|High|Medium|Low\",\n        \"complexity\": \"High|Medium|Low\",\n        \"estimated_effort\": \"string (e.g., 2 weeks)\",\n        \"dependencies\": [\"string\"],\n        \"technical_requirements\": [\"string\"],\n        \"acceptance_criteria\": [\"string\"]\n      }\n    ],\n    \"technical_architecture\": {\n      \"system_components\": [\"string\"],\n      \"integration_points\": [\"string\"],\n      \"data_flow\": \"string\",\n      \"security_considerations\": [\"string\"]\n    },\n    \"implementation_phases\": [\n      {\n        \"phase_number\": \"number\",\n        \"phase_name\": \"string\",\n        \"description\": \"string\",\n        \"features_included\": [\"string\"],\n        \"estimated_duration\": \"string\",\n        \"deliverables\": [\"string\"]\n      }\n    ],\n    \"risk_analysis\": [\n      {\n        \"risk_id\": \"string\",\n        \"description\": \"string\",\n        \"impact\": \"High|Medium|Low\",\n        \"probability\": \"High|Medium|Low\",\n        \"mitigation_strategy\": \"string\"\n      }\n    ],\n    \"resource_requirements\": {\n      \"team_composition\": [\"string\"],\n      \"tools_and_technologies\": [\"string\"],\n      \"infrastructure_needs\": [\"string\"]\n    },\n    \"success_metrics\": [\n      {\n        \"metric_name\": \"string\",\n        \"target_value\": \"string\",\n        \"measurement_method\": \"string\"\n      }\n    ]\n  }\n}\n\nIMPORTANT GUIDELINES:
-1. Be EXTREMELY thorough and detailed in every section
-2. For each feature, provide comprehensive technical requirements and acceptance criteria (at least 2-4 items each)
-3. Include specific technology recommendations where applicable (e.g., OAuth 2.0, SAML 2.0, specific frameworks)
-4. Provide realistic effort estimates (in weeks or months)
-5. Include detailed risk mitigation strategies for each identified risk
-6. Be specific about team roles, tools, and infrastructure needs
-7. Ensure all dependencies and integration points are clearly identified
-8. Return ONLY valid JSON, no markdown formatting, no explanation text. Start with { and end with }.
-
-Focus on technical feasibility, implementation details, and actionable recommendations. This plan will be used by engineering teams, so be as specific and detailed as possible.`;\n\nreturn {\n  json: {\n    prompt: prompt,\n    brd_data: data\n  }\n};"
+        "jsCode": "// Prepare the prompt for Anthropic API\nconst data = $input.item.json;\n\n// Get the full parsed BRD for maximum context\nconst fullBRD = data.full_brd || data;\n\nconst prompt = `You are an expert Software Engineering Manager and Technical Architect. Your task is to create a comprehensive, structured engineering plan based on a Business Requirements Document (BRD).\n\nHere is the complete BRD:\n${JSON.stringify(fullBRD, null, 2)}\n\nPlease analyze this BRD thoroughly and generate a detailed, comprehensive Structured Engineering Plan in JSON format with the following structure:\n\n{\n  \"engineering_plan\": {\n    \"project_overview\": {\n      \"name\": \"string\",\n      \"description\": \"string\",\n      \"objectives\": [\"string\"]\n    },\n    \"feature_breakdown\": [\n      {\n        \"feature_id\": \"string\",\n        \"feature_name\": \"string\",\n        \"description\": \"string\",\n        \"priority\": \"Critical|High|Medium|Low\",\n        \"complexity\": \"High|Medium|Low\",\n        \"estimated_effort\": \"string (e.g., 2 weeks)\",\n        \"dependencies\": [\"string\"],\n        \"technical_requirements\": [\"string\"],\n        \"acceptance_criteria\": [\"string\"]\n      }\n    ],\n    \"technical_architecture\": {\n      \"system_components\": [\"string\"],\n      \"integration_points\": [\"string\"],\n      \"data_flow\": \"string\",\n      \"security_considerations\": [\"string\"]\n    },\n    \"implementation_phases\": [\n      {\n        \"phase_number\": \"number\",\n        \"phase_name\": \"string\",\n        \"description\": \"string\",\n        \"features_included\": [\"string\"],\n        \"estimated_duration\": \"string\",\n        \"deliverables\": [\"string\"]\n      }\n    ],\n    \"risk_analysis\": [\n      {\n        \"risk_id\": \"string\",\n        \"description\": \"string\",\n        \"impact\": \"High|Medium|Low\",\n        \"probability\": \"High|Medium|Low\",\n        \"mitigation_strategy\": \"string\"\n      }\n    ],\n    \"resource_requirements\": {\n      \"team_composition\": [\"string\"],\n      \"tools_and_technologies\": [\"string\"],\n      \"infrastructure_needs\": [\"string\"]\n    },\n    \"success_metrics\": [\n      {\n        \"metric_name\": \"string\",\n        \"target_value\": \"string\",\n        \"measurement_method\": \"string\"\n      }\n    ]\n  }\n}\n\nIMPORTANT GUIDELINES:\n1. Be EXTREMELY thorough and detailed in every section\n2. For each feature, provide comprehensive technical requirements and acceptance criteria (at least 2-4 items each)\n3. Include specific technology recommendations where applicable (e.g., OAuth 2.0, SAML 2.0, specific frameworks)\n4. Provide realistic effort estimates (in weeks or months)\n5. Include detailed risk mitigation strategies for each identified risk\n6. Be specific about team roles, tools, and infrastructure needs\n7. Ensure all dependencies and integration points are clearly identified\n8. Return ONLY valid JSON, no markdown formatting, no explanation text. Start with { and end with }.\n\nFocus on technical feasibility, implementation details, and actionable recommendations. This plan will be used by engineering teams, so be as specific and detailed as possible.`;\n\nreturn {\n  json: {\n    prompt: prompt,\n    brd_data: data\n  }\n};"
       },
       "id": "prepare-prompt-001",
       "name": "Prepare AI Prompt",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [850, 300]
+      "position": [
+        850,
+        300
+      ]
     },
     {
       "parameters": {
@@ -93,7 +95,10 @@ Focus on technical feasibility, implementation details, and actionable recommend
       "name": "AI - Generate Engineering Plan",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1050, 300],
+      "position": [
+        1050,
+        300
+      ],
       "credentials": {
         "httpHeaderAuth": {
           "id": "anthropic-header-auth",
@@ -109,7 +114,10 @@ Focus on technical feasibility, implementation details, and actionable recommend
       "name": "Format Engineering Plan Output",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1250, 300]
+      "position": [
+        1250,
+        300
+      ]
     },
     {
       "parameters": {
@@ -131,7 +139,10 @@ Focus on technical feasibility, implementation details, and actionable recommend
       "name": "Save to State",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.3,
-      "position": [1450, 300]
+      "position": [
+        1450,
+        300
+      ]
     },
     {
       "parameters": {
@@ -141,7 +152,10 @@ Focus on technical feasibility, implementation details, and actionable recommend
       "name": "Prepare File Data",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1650, 300]
+      "position": [
+        1650,
+        300
+      ]
     },
     {
       "parameters": {
@@ -152,7 +166,10 @@ Focus on technical feasibility, implementation details, and actionable recommend
       "name": "Write File to Disk",
       "type": "n8n-nodes-base.writeBinaryFile",
       "typeVersion": 1,
-      "position": [1850, 300]
+      "position": [
+        1850,
+        300
+      ]
     },
     {
       "parameters": {
@@ -174,7 +191,10 @@ Focus on technical feasibility, implementation details, and actionable recommend
       "name": "Respond with Engineering Plan",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [2050, 300]
+      "position": [
+        2050,
+        300
+      ]
     },
     {
       "parameters": {
@@ -184,7 +204,10 @@ Focus on technical feasibility, implementation details, and actionable recommend
       "name": "Handle Error",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [650, 500]
+      "position": [
+        650,
+        500
+      ]
     },
     {
       "parameters": {
@@ -198,7 +221,10 @@ Focus on technical feasibility, implementation details, and actionable recommend
       "name": "Respond with Error",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [850, 500]
+      "position": [
+        850,
+        500
+      ]
     }
   ],
   "connections": {
