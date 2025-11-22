@@ -51,6 +51,10 @@ def submit_brd_to_orchestrator(brd_data: Dict[str, Any], orchestrator_url: str) 
 def validate_brd_json(brd_text: str) -> tuple[bool, Optional[Dict], Optional[str]]:
     """
     Validate BRD JSON format.
+    Accepts multiple formats:
+    1. Direct BRD: {project: {...}, features: [...]}
+    2. Parser format: {raw_brd_text: "..."}
+    3. Wrapped format: {brd_data: {...}}
     
     Returns:
         (is_valid, parsed_json, error_message)
@@ -61,13 +65,23 @@ def validate_brd_json(brd_text: str) -> tuple[bool, Optional[Dict], Optional[str
         # Basic validation
         if not isinstance(data, dict):
             return False, None, "BRD must be a JSON object"
-            
-        # Check for required fields (at least project or features)
-        if "project" not in data and "features" not in data:
-            return False, None, "BRD must contain 'project' or 'features' field"
-            
-        return True, data, None
         
+        # Accept multiple BRD formats
+        # Format 1: Direct BRD with project/features
+        if "project" in data or "features" in data:
+            return True, data, None
+        
+        # Format 2: Parser format with raw_brd_text
+        if "raw_brd_text" in data:
+            return True, data, None
+        
+        # Format 3: Wrapped in brd_data
+        if "brd_data" in data:
+            return True, data, None
+        
+        # If none of the expected formats, show helpful error
+        return False, None, "BRD must contain one of: 'project', 'features', 'raw_brd_text', or 'brd_data'"
+            
     except json.JSONDecodeError as e:
         return False, None, f"Invalid JSON: {str(e)}"
 
