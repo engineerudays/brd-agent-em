@@ -211,7 +211,7 @@ def render_input_tab():
         
         if is_valid:
             st.success("✅ Valid BRD JSON")
-            st.toast("✅ BRD validated successfully", icon="✓")
+            st.toast("✅ BRD validated successfully", icon="✅")
             
             # Show preview
             with st.expander("View BRD Details", expanded=False):
