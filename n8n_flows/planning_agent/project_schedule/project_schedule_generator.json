@@ -12,7 +12,10 @@
       "name": "Webhook - Receive Engineering Plan",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
-      "position": [250, 300],
+      "position": [
+        250,
+        300
+      ],
       "webhookId": "planning-agent-project-schedule"
     },
     {
@@ -30,7 +33,10 @@
       "name": "Validate Engineering Plan",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
-      "position": [450, 300]
+      "position": [
+        450,
+        300
+      ]
     },
     {
       "parameters": {
@@ -40,17 +46,23 @@
       "name": "Parse Engineering Plan",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [650, 300]
+      "position": [
+        650,
+        300
+      ]
     },
     {
       "parameters": {
-        "jsCode": "// Prepare the prompt for Anthropic API\nconst data = $input.item.json;\n\nconst prompt = `You are an expert Project Manager and Engineering Leader specializing in software project scheduling and resource planning.\n\nBased on the following Engineering Plan, create a detailed Project Schedule:\n\nProject: ${data.project_name}\nTotal Features: ${data.total_features}\nImplementation Phases: ${JSON.stringify(data.phases)}\nFeatures Details: ${JSON.stringify(data.features)}\nRisks: ${JSON.stringify(data.risks)}\nResource Requirements: ${JSON.stringify(data.resources)}\n\nGenerate a comprehensive Project Schedule in JSON format with this structure:\n\n{\n  \"project_schedule\": {\n    \"project_info\": {\n      \"project_name\": \"string\",\n      \"start_date\": \"YYYY-MM-DD\",\n      \"estimated_end_date\": \"YYYY-MM-DD\",\n      \"total_duration_weeks\": \"number\",\n      \"total_effort_person_weeks\": \"number\"\n    },\n    \"phases\": [\n      {\n        \"phase_id\": \"string\",\n        \"phase_name\": \"string\",\n        \"start_date\": \"YYYY-MM-DD\",\n        \"end_date\": \"YYYY-MM-DD\",\n        \"duration_weeks\": \"number\",\n        \"milestones\": [\n          {\n            \"milestone_id\": \"string\",\n            \"name\": \"string\",\n            \"target_date\": \"YYYY-MM-DD\",\n            \"deliverables\": [\"string\"],\n            \"dependencies\": [\"string\"]\n          }\n        ],\n        \"tasks\": [\n          {\n            \"task_id\": \"string\",\n            \"task_name\": \"string\",\n            \"description\": \"string\",\n            \"assigned_to\": \"string (role)\",\n            \"start_date\": \"YYYY-MM-DD\",\n            \"end_date\": \"YYYY-MM-DD\",\n            \"effort_days\": \"number\",\n            \"status\": \"Not Started|In Progress|Completed\",\n            \"dependencies\": [\"string\"],\n            \"priority\": \"Critical|High|Medium|Low\"\n          }\n        ]\n      }\n    ],\n    \"resource_allocation\": [\n      {\n        \"role\": \"string\",\n        \"allocation_percentage\": \"number\",\n        \"start_date\": \"YYYY-MM-DD\",\n        \"end_date\": \"YYYY-MM-DD\",\n        \"key_responsibilities\": [\"string\"]\n      }\n    ],\n    \"critical_path\": [\n      {\n        \"task_id\": \"string\",\n        \"task_name\": \"string\",\n        \"duration_days\": \"number\",\n        \"slack_days\": \"number\"\n      }\n    ],\n    \"risk_timeline\": [\n      {\n        \"risk_id\": \"string\",\n        \"description\": \"string\",\n        \"impact_on_schedule\": \"string\",\n        \"contingency_buffer_days\": \"number\"\n      }\n    ],\n    \"key_deliverables\": [\n      {\n        \"deliverable_name\": \"string\",\n        \"due_date\": \"YYYY-MM-DD\",\n        \"responsible_team\": \"string\",\n        \"dependencies\": [\"string\"]\n      }\n    ],\n    \"assumptions\": [\"string\"],\n    \"constraints\": [\"string\"]\n  }\n}\n\nIMPORTANT: Return ONLY valid JSON, no markdown formatting, no explanation text. Start with { and end with }.\n\nAssume today's date as the project start date. Be realistic with timelines, account for dependencies, and include buffer time for risks. Provide specific dates and detailed task breakdowns.`;\n\nreturn {\n  json: {\n    prompt: prompt,\n    schedule_data: data\n  }\n};"
+        "jsCode": "// Prepare the prompt for Anthropic API\nconst data = $input.item.json;\n\n// Get current date for project start\nconst currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format\n\nconst prompt = `You are an expert Project Manager and Engineering Leader specializing in software project scheduling and resource planning.\n\nBased on the following Engineering Plan, create a detailed Project Schedule:\n\nProject: ${data.project_name}\nTotal Features: ${data.total_features}\nImplementation Phases: ${JSON.stringify(data.phases)}\nFeatures Details: ${JSON.stringify(data.features)}\nRisks: ${JSON.stringify(data.risks)}\nResource Requirements: ${JSON.stringify(data.resources)}\n\n**IMPORTANT: Use ${currentDate} as the project start date (today's date).**\n\nGenerate a comprehensive Project Schedule in JSON format with this structure:\n\n{\n  \"project_schedule\": {\n    \"project_info\": {\n      \"project_name\": \"string\",\n      \"start_date\": \"YYYY-MM-DD\",\n      \"estimated_end_date\": \"YYYY-MM-DD\",\n      \"total_duration_weeks\": \"number\",\n      \"total_effort_person_weeks\": \"number\"\n    },\n    \"phases\": [\n      {\n        \"phase_id\": \"string\",\n        \"phase_name\": \"string\",\n        \"start_date\": \"YYYY-MM-DD\",\n        \"end_date\": \"YYYY-MM-DD\",\n        \"duration_weeks\": \"number\",\n        \"milestones\": [\n          {\n            \"milestone_id\": \"string\",\n            \"name\": \"string\",\n            \"target_date\": \"YYYY-MM-DD\",\n            \"deliverables\": [\"string\"],\n            \"dependencies\": [\"string\"]\n          }\n        ],\n        \"tasks\": [\n          {\n            \"task_id\": \"string\",\n            \"task_name\": \"string\",\n            \"description\": \"string\",\n            \"assigned_to\": \"string (role)\",\n            \"start_date\": \"YYYY-MM-DD\",\n            \"end_date\": \"YYYY-MM-DD\",\n            \"effort_days\": \"number\",\n            \"status\": \"Not Started|In Progress|Completed\",\n            \"dependencies\": [\"string\"],\n            \"priority\": \"Critical|High|Medium|Low\"\n          }\n        ]\n      }\n    ],\n    \"resource_allocation\": [\n      {\n        \"role\": \"string\",\n        \"allocation_percentage\": \"number\",\n        \"start_date\": \"YYYY-MM-DD\",\n        \"end_date\": \"YYYY-MM-DD\",\n        \"key_responsibilities\": [\"string\"]\n      }\n    ],\n    \"critical_path\": [\n      {\n        \"task_id\": \"string\",\n        \"task_name\": \"string\",\n        \"duration_days\": \"number\",\n        \"slack_days\": \"number\"\n      }\n    ],\n    \"risk_timeline\": [\n      {\n        \"risk_id\": \"string\",\n        \"description\": \"string\",\n        \"impact_on_schedule\": \"string\",\n        \"contingency_buffer_days\": \"number\"\n      }\n    ],\n    \"key_deliverables\": [\n      {\n        \"deliverable_name\": \"string\",\n        \"due_date\": \"YYYY-MM-DD\",\n        \"responsible_team\": \"string\",\n        \"dependencies\": [\"string\"]\n      }\n    ],\n    \"assumptions\": [\"string\"],\n    \"constraints\": [\"string\"]\n  }\n}\n\nIMPORTANT: \n- Return ONLY valid JSON, no markdown formatting, no explanation text. Start with { and end with }.\n- Use ${currentDate} as the start_date for the project.\n- Calculate all other dates relative to ${currentDate}.\n- Be realistic with timelines, account for dependencies, and include buffer time for risks.\n- Provide specific dates in YYYY-MM-DD format and detailed task breakdowns.`;\n\nreturn {\n  json: {\n    prompt: prompt,\n    schedule_data: data,\n    current_date: currentDate\n  }\n};"
       },
       "id": "prepare-prompt-002",
       "name": "Prepare AI Prompt",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [850, 300]
+      "position": [
+        850,
+        300
+      ]
     },
     {
       "parameters": {
@@ -83,7 +95,10 @@
       "name": "AI - Generate Project Schedule",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1050, 300],
+      "position": [
+        1050,
+        300
+      ],
       "credentials": {
         "httpHeaderAuth": {
           "id": "anthropic-header-auth",
@@ -99,7 +114,10 @@
       "name": "Format Schedule Output",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1250, 300]
+      "position": [
+        1250,
+        300
+      ]
     },
     {
       "parameters": {
@@ -109,7 +127,10 @@
       "name": "Generate Gantt Chart Data",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1450, 300]
+      "position": [
+        1450,
+        300
+      ]
     },
     {
       "parameters": {
@@ -131,7 +152,10 @@
       "name": "Save Schedule to State",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.3,
-      "position": [1450, 450]
+      "position": [
+        1450,
+        450
+      ]
     },
     {
       "parameters": {
@@ -153,7 +177,10 @@
       "name": "Save Gantt Data to State",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.3,
-      "position": [1650, 300]
+      "position": [
+        1650,
+        300
+      ]
     },
     {
       "parameters": {
@@ -163,7 +190,10 @@
       "name": "Merge Final Output",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1850, 300]
+      "position": [
+        1850,
+        300
+      ]
     },
     {
       "parameters": {
@@ -173,7 +203,10 @@
       "name": "Prepare File Data",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2050, 300]
+      "position": [
+        2050,
+        300
+      ]
     },
     {
       "parameters": {
@@ -184,7 +217,10 @@
       "name": "Write File to Disk",
       "type": "n8n-nodes-base.writeBinaryFile",
       "typeVersion": 1,
-      "position": [2250, 300]
+      "position": [
+        2250,
+        300
+      ]
     },
     {
       "parameters": {
@@ -206,7 +242,10 @@
       "name": "Respond with Schedule",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [2450, 300]
+      "position": [
+        2450,
+        300
+      ]
     },
     {
       "parameters": {
@@ -216,7 +255,10 @@
       "name": "Handle Schedule Error",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [650, 500]
+      "position": [
+        650,
+        500
+      ]
     },
     {
       "parameters": {
@@ -230,7 +272,10 @@
       "name": "Respond with Schedule Error",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [850, 500]
+      "position": [
+        850,
+        500
+      ]
     }
   ],
   "connections": {
